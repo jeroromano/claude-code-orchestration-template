@@ -9,6 +9,14 @@ Se actualiza al re-sincronizar; no se elimina. Sin el stamp, el drift se vuelve 
 
 Ruteo de modelos, compuertas de gasto y compuertas de revisión para [Claude Code](https://code.claude.com) — con degradación limpia cuando faltan las piezas opcionales.
 
+**Qué es.** Una capa de orquestación drop-in para [Claude Code](https://code.claude.com): unos pocos subagents especializados, un skill reutilizable de Claude Code, y un único archivo de política corto (`CLAUDE.md`). Rutea cada tarea al modelo capaz más barato y mantiene un revisor independiente entre el autor y el merge. Opcionalmente se combina con el CLI de [OpenAI Codex](https://github.com/openai/codex-plugin-cc) para revisión de código con IA cross-family.
+
+**Para quién es.** Desarrolladores que usan Claude Code y quieren orquestación de agentes con disciplina — ruteo de tareas deliberado, subagents aislados y flujos de revisión — en vez de prompting ad-hoc, con validación cross-model opcional.
+
+**Qué resuelve.** Las sesiones multi-agente largas derivan y sobregastan. Este template mantiene limpio el contexto de tu sesión principal, rutea el trabajo mecánico a modelos baratos y el razonamiento difícil a los caros, y nunca deja que un modelo apruebe su propio diff.
+
+**Qué incluye:** cuatro agentes de Claude Code (fast worker, deep reasoner, premium reasoner, diff reviewer), un skill delegation-protocol, compuertas de gasto y compuertas de revisión manuales — todo Markdown plano, sin scripts ni dependencias. Ver [Qué incluye](#qué-incluye) para el mapa completo.
+
 **Qué NO es esto: un truco para ahorrar tokens.** Delegar normalmente *aumenta* los tokens totales: cada worker reconstruye su propio contexto, y solo vuelve un resumen. La guía de costos de Anthropic ubica a los agent teams en aproximadamente 7x los tokens de una sesión estándar cuando los teammates corren en plan mode; la delegación ordinaria con subagents queda por debajo de eso, pero el mecanismo — y la dirección — son los mismos. Lo que realmente comprás:
 
 - **Aislamiento de contexto.** Los workers queman sus tokens en sus propias ventanas de contexto; solo un resumen regresa. Tu sesión principal se mantiene limpia, que es lo que preserva la calidad de decisión en sesiones largas.
@@ -104,6 +112,22 @@ Reiniciá la sesión; `/agents` no debería listar ninguno.
 El inglés es canónico — ante discrepancias gana [README.md](README.md). Esta traducción al español se mantiene junto al original; traducciones al portugués (o cualquier otro idioma) son bienvenidas vía PR.
 
 Los archivos de instrucciones (`CLAUDE.md`, agentes, skill) están en inglés **por diseño** y no se traducen: Claude Code los lee en inglés e igual conversa con vos en tu idioma, así que un único set canónico de instrucciones no cuesta nada en la capa de interacción — y previene el peor drift posible: que dos traducciones de la misma política produzcan dos comportamientos distintos.
+
+## Metadatos del repositorio (para mantenedores)
+
+Configuración de GitHub recomendada para descubribilidad. Pegá estos valores a mano en el panel **About** y en **Settings** del repo — esta sección es solo documentación y no cambia ningún metadato remoto automáticamente. Los valores se dejan en inglés porque son los que se pegan literalmente en GitHub.
+
+**About description:**
+
+> Claude Code orchestration template for specialized agents, reusable skills, spend gates, and optional Codex review workflows.
+
+**Topics:**
+
+`claude-code` `claude-code-agents` `claude-code-skills` `subagents` `ai-agents` `agent-orchestration` `multi-agent` `codex` `codex-cli` `code-review` `developer-tools` `prompt-engineering` `llm-workflows` `automation`
+
+**Social preview (opcional):** el ajuste de social preview de GitHub es una imagen, no un campo de texto. Texto sugerido para esa imagen (o como descripción Open Graph):
+
+> Claude Code Orchestration Template - specialized agents, reusable skills, spend gates, and optional cross-family Codex review.
 
 ## Créditos
 

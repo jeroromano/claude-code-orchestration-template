@@ -4,6 +4,14 @@
 
 Model routing, spend gates and review gates for [Claude Code](https://code.claude.com) - with clean degradation when the optional pieces are missing.
 
+**What it is.** A drop-in orchestration layer for [Claude Code](https://code.claude.com): a few specialized subagents, a reusable Claude Code skill, and one short policy file (`CLAUDE.md`). It routes each task to the cheapest capable model and keeps an independent reviewer between the author and the merge. Optionally pairs with the [OpenAI Codex](https://github.com/openai/codex-plugin-cc) CLI for cross-family AI code review.
+
+**Who it's for.** Developers using Claude Code who want disciplined agent orchestration - deliberate task routing, isolated subagents, and review workflows - instead of ad-hoc prompting, with optional cross-model validation.
+
+**What it solves.** Long multi-agent sessions drift and overspend. This template keeps your main session's context clean, routes mechanical work to cheap models and hard reasoning to expensive ones, and never lets a model approve its own diff.
+
+**What's included:** four Claude Code agents (fast worker, deep reasoner, premium reasoner, diff reviewer), a delegation-protocol skill, spend gates, and manual review gates - all plain Markdown, no scripts or dependencies. See [What's in the box](#whats-in-the-box) for the full map.
+
 **What this is not: a token-saving trick.** Delegation usually *increases* total tokens: every worker rebuilds its own context, and only a summary returns. Anthropic's cost guidance puts agent teams at approximately 7x the tokens of a standard session when teammates run in plan mode; ordinary subagent delegation sits below that, but the mechanism - and the direction - is the same. What you actually buy:
 
 - **Context isolation.** Workers burn their tokens in their own context windows; only a summary returns. Your main session stays clean, which is what preserves decision quality over long sessions.
@@ -102,6 +110,22 @@ Restart the session; `/agents` should list none of them.
 English is canonical - this file wins on any discrepancy. A maintained Spanish translation lives in [README.es.md](README.es.md); Portuguese (or any other) translations are welcome via PR.
 
 The instruction files (`CLAUDE.md`, agents, skill) are English **by design** and are not translated: Claude Code reads them in English and still converses with you in whatever language you use, so a single canonical instruction set costs nothing at the interaction layer - and prevents the worst kind of drift, where two translations of the same policy produce two different behaviors.
+
+## Repository metadata (for maintainers)
+
+Recommended GitHub settings for discoverability. Paste these manually into the repo's **About** panel and **Settings** - this section is documentation only and changes no remote metadata automatically.
+
+**About description:**
+
+> Claude Code orchestration template for specialized agents, reusable skills, spend gates, and optional Codex review workflows.
+
+**Topics:**
+
+`claude-code` `claude-code-agents` `claude-code-skills` `subagents` `ai-agents` `agent-orchestration` `multi-agent` `codex` `codex-cli` `code-review` `developer-tools` `prompt-engineering` `llm-workflows` `automation`
+
+**Social preview (optional):** GitHub's social-preview setting is an image upload, not a text field. Suggested caption for that image (or an Open Graph description):
+
+> Claude Code Orchestration Template - specialized agents, reusable skills, spend gates, and optional cross-family Codex review.
 
 ## Credits
 
