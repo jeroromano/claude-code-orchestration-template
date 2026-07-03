@@ -15,7 +15,7 @@ Mechanics live in the `delegation-protocol` skill - use it for any delegation or
 - One writer per file. Parallel writers only on separate branches/worktrees.
 
 ## Review gate (manual, branch-level)
-- Before merge: `/codex:review --base main --background` if the Codex plugin is installed; otherwise the diff-reviewer agent. (FILL IN: replace `main` if this repo's default branch differs.)
+- Before merging a branch with runtime/behavioral surface (e.g. code, migrations, hooks): `/codex:review --base main --background` if the Codex plugin is installed; otherwise the diff-reviewer agent. Pure-doc changes with no runtime/behavioral surface may be self-merged; the `delegation-protocol` skill (§3) defines the threshold. (FILL IN: replace `main` if this repo's default branch differs.)
 - Risk-path changes additionally get an adversarial pass (`/codex:adversarial-review`, or diff-reviewer with the focus text below).
 - Never skip the second pass. Never enable the automatic review gate.
 
