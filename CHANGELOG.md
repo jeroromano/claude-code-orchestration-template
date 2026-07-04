@@ -6,6 +6,11 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 _Nothing yet._
 
+## [0.1.3] - 2026-07-03
+
+### Removed
+- The maintainer "Repository metadata" section from both READMEs (English and Spanish). It rendered on the public repo landing page but only served a one-time maintainer setup task (setting GitHub About/topics), which is complete; the recommended values remain in git history if ever needed again.
+
 ## [0.1.2] - 2026-07-03
 
 ### Added
@@ -26,7 +31,8 @@ _Nothing yet._
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.3
 [0.1.2]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.2
 [0.1.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.1
 [0.1.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.0

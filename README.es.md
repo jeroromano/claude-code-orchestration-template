@@ -113,22 +113,6 @@ El inglés es canónico — ante discrepancias gana [README.md](README.md). Esta
 
 Los archivos de instrucciones (`CLAUDE.md`, agentes, skill) están en inglés **por diseño** y no se traducen: Claude Code los lee en inglés e igual conversa con vos en tu idioma, así que un único set canónico de instrucciones no cuesta nada en la capa de interacción — y previene el peor drift posible: que dos traducciones de la misma política produzcan dos comportamientos distintos.
 
-## Metadatos del repositorio (para mantenedores)
-
-Configuración de GitHub recomendada para descubribilidad. Pegá estos valores a mano en el panel **About** y en **Settings** del repo — esta sección es solo documentación y no cambia ningún metadato remoto automáticamente. Los valores se dejan en inglés porque son los que se pegan literalmente en GitHub.
-
-**About description:**
-
-> Claude Code orchestration template for specialized agents, reusable skills, spend gates, and optional Codex review workflows.
-
-**Topics:**
-
-`claude-code` `claude-code-agents` `claude-code-skills` `subagents` `ai-agents` `agent-orchestration` `multi-agent` `codex` `codex-cli` `code-review` `developer-tools` `prompt-engineering` `llm-workflows` `automation`
-
-**Social preview (opcional):** el ajuste de social preview de GitHub es una imagen, no un campo de texto. Texto sugerido para esa imagen (o como descripción Open Graph):
-
-> Claude Code Orchestration Template - specialized agents, reusable skills, spend gates, and optional cross-family Codex review.
-
 ## Créditos
 
 Diseñado para [Claude Code](https://code.claude.com), opcionalmente en pareja con el [plugin de Codex de OpenAI para Claude Code](https://github.com/openai/codex-plugin-cc).

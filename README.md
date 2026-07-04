@@ -111,22 +111,6 @@ English is canonical - this file wins on any discrepancy. A maintained Spanish t
 
 The instruction files (`CLAUDE.md`, agents, skill) are English **by design** and are not translated: Claude Code reads them in English and still converses with you in whatever language you use, so a single canonical instruction set costs nothing at the interaction layer - and prevents the worst kind of drift, where two translations of the same policy produce two different behaviors.
 
-## Repository metadata (for maintainers)
-
-Recommended GitHub settings for discoverability. Paste these manually into the repo's **About** panel and **Settings** - this section is documentation only and changes no remote metadata automatically.
-
-**About description:**
-
-> Claude Code orchestration template for specialized agents, reusable skills, spend gates, and optional Codex review workflows.
-
-**Topics:**
-
-`claude-code` `claude-code-agents` `claude-code-skills` `subagents` `ai-agents` `agent-orchestration` `multi-agent` `codex` `codex-cli` `code-review` `developer-tools` `prompt-engineering` `llm-workflows` `automation`
-
-**Social preview (optional):** GitHub's social-preview setting is an image upload, not a text field. Suggested caption for that image (or an Open Graph description):
-
-> Claude Code Orchestration Template - specialized agents, reusable skills, spend gates, and optional cross-family Codex review.
-
 ## Credits
 
 Designed for [Claude Code](https://code.claude.com), optionally pairing with [OpenAI's Codex plugin for Claude Code](https://github.com/openai/codex-plugin-cc).
