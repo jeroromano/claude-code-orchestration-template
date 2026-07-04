@@ -14,6 +14,7 @@ A **documentation template** for orchestrating [Claude Code](https://code.claude
 | `CLAUDE.md` | The orchestration policy - behavioral source of truth. |
 | `.claude/agents/*.md` | The four subagents: `fast-worker`, `deep-reasoner`, `premium-reasoner`, `diff-reviewer`. |
 | `.claude/skills/delegation-protocol/SKILL.md` | Delegation mechanics: task-spec template, routing table, review rules. |
+| `docs/example-workflow.md` | Worked end-to-end example of the delegation protocol. Documentation only - not part of the install payload. |
 | `llms.txt` | Compact machine-readable map of the project. |
 
 ## Working rules

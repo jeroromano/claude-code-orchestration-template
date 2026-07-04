@@ -8,6 +8,8 @@ Model routing, spend gates and review gates for [Claude Code](https://code.claud
 
 **Who it's for.** Developers using Claude Code who want disciplined agent orchestration - deliberate task routing, isolated subagents, and review workflows - instead of ad-hoc prompting, with optional cross-model validation.
 
+**Who it's not for.** If your tasks are small and your sessions short, writing a delegation spec costs more than doing the work - prompt directly instead; the protocol itself forbids delegating a task smaller than its spec. If you want an autonomous pipeline that ships code without a human decision, this template is the opposite by design: every gate ends in a human. And if you came for token savings, read **What this is not** below first - delegation usually raises the bill.
+
 **What it solves.** Long multi-agent sessions drift and overspend. This template keeps your main session's context clean, routes mechanical work to cheap models and hard reasoning to expensive ones, and never lets a model approve its own diff.
 
 **What's included:** four Claude Code agents (fast worker, deep reasoner, premium reasoner, diff reviewer), a delegation-protocol skill, spend gates, and manual review gates - all plain Markdown, no scripts or dependencies. See [What's in the box](#whats-in-the-box) for the full map.
@@ -45,6 +47,29 @@ Works wherever Claude Code runs: macOS, Linux, and Windows (native or WSL). The 
 2. Fill the **Project commands** block in `CLAUDE.md` (build / test / lint). Every delegation spec anchors on them - without validation commands the whole protocol is decorative.
 3. Replace the **Risk paths** placeholders with your real ones (auth, payments, migrations, user data...).
 4. Restart your Claude Code session - subagent files load at session start - and verify with `/agents` that the four workers appear.
+
+What `/agents` should show - the exact layout varies by Claude Code version, so treat this as the expected shape, not a promised rendering:
+
+```text
+Project agents (.claude/agents)
+  fast-worker        sonnet
+  deep-reasoner      opus
+  premium-reasoner   fable
+  diff-reviewer      sonnet
+```
+
+A missing name means the file did not load: check the path (`.claude/agents/*.md` at the repo root) and restart the session. A model value different from the one the file pins means your organization's allowlist silently excluded it - see [the spend gate](#the-spend-gate).
+
+## First run
+
+Once `/agents` lists the four workers, exercise the protocol once on something harmless:
+
+1. Pick a small, fully-specified task - a unit test to add, a rename, a docstring pass.
+2. Ask for it through the protocol: *"Delegate to fast-worker: \<task\>. Follow the delegation protocol."*
+3. Two behaviors prove the template is live: a task spec (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) appears *before* any delegation, and the diff comes back with a report instead of being silently applied.
+4. Before merging anything behavioral, ask for the independent review pass - `/codex:review --base main --background` with the plugin, the `diff-reviewer` agent without it - and check that the reviewer is not the author.
+
+A complete worked example - task spec, routing decision, reviewer findings, fix round, convergence - lives in [docs/example-workflow.md](docs/example-workflow.md).
 
 ## The spend gate
 

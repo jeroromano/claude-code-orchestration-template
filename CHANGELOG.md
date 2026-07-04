@@ -4,7 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- `docs/example-workflow.md`: a worked end-to-end example - task spec, routing decision, fast-worker report, independent review, fix round, convergence, merge.
+- README (EN/ES): a "Who it's not for" paragraph, the expected shape of the `/agents` check after install, and a "First run" section linking the worked example.
+- `AGENTS.md` (repo map) and `llms.txt` (start-here index): one-line pointers to the new example doc.
 
 ## [0.1.3] - 2026-07-03
 

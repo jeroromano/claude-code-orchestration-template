@@ -13,6 +13,8 @@ Ruteo de modelos, compuertas de gasto y compuertas de revisión para [Claude Cod
 
 **Para quién es.** Desarrolladores que usan Claude Code y quieren orquestación de agentes con disciplina — ruteo de tareas deliberado, subagents aislados y flujos de revisión — en vez de prompting ad-hoc, con validación cross-model opcional.
 
+**Para quién NO es.** Si tus tareas son chicas y tus sesiones cortas, escribir una spec de delegación cuesta más que hacer el trabajo directamente — prompteá directo en cambio; el protocolo mismo prohíbe delegar una tarea más chica que su spec. Si buscás un pipeline autónomo que entrega código sin una decisión humana, este template es lo opuesto por diseño: toda compuerta termina en un humano. Y si viniste por ahorro de tokens, leé primero **Qué NO es esto** más abajo — delegar normalmente sube la factura.
+
 **Qué resuelve.** Las sesiones multi-agente largas derivan y sobregastan. Este template mantiene limpio el contexto de tu sesión principal, rutea el trabajo mecánico a modelos baratos y el razonamiento difícil a los caros, y nunca deja que un modelo apruebe su propio diff.
 
 **Qué incluye:** cuatro agentes de Claude Code (fast worker, deep reasoner, premium reasoner, diff reviewer), un skill delegation-protocol, compuertas de gasto y compuertas de revisión manuales — todo Markdown plano, sin scripts ni dependencias. Ver [Qué incluye](#qué-incluye) para el mapa completo.
@@ -50,6 +52,29 @@ Funciona donde funcione Claude Code: macOS, Linux y Windows (nativo o WSL). El t
 2. Completá el bloque **Project commands** de `CLAUDE.md` (build / test / lint). Cada spec de delegación se ancla en ellos — sin comandos de validación, todo el protocolo es decorativo.
 3. Reemplazá los placeholders de **Risk paths** por los tuyos reales (auth, pagos, migraciones, datos de usuarios...).
 4. Reiniciá tu sesión de Claude Code — los archivos de subagents se cargan al inicio de sesión — y verificá con `/agents` que aparecen los cuatro workers.
+
+Lo que debería mostrar `/agents` — el layout exacto varía según la versión de Claude Code, así que tomá esto como la forma esperada, no como un renderizado garantizado:
+
+```text
+Project agents (.claude/agents)
+  fast-worker        sonnet
+  deep-reasoner      opus
+  premium-reasoner   fable
+  diff-reviewer      sonnet
+```
+
+Un nombre faltante significa que el archivo no cargó: verificá el path (`.claude/agents/*.md` en la raíz del repo) y reiniciá la sesión. Un valor de modelo distinto al que el archivo fija significa que el allowlist de modelos de tu organización lo excluyó en silencio — ver [la compuerta de gasto](#la-compuerta-de-gasto).
+
+## Primer uso
+
+Una vez que `/agents` liste los cuatro workers, ejercitá el protocolo una vez con algo inofensivo:
+
+1. Elegí una tarea chica y completamente especificada — un test unitario para agregar, un rename, una pasada de docstrings.
+2. Pedila a través del protocolo: *"Delegá a fast-worker: \<tarea\>. Seguí el protocolo de delegación."*
+3. Dos comportamientos prueban que el template está vivo: una spec de tarea (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) aparece *antes* de cualquier delegación, y el diff vuelve con un reporte en vez de aplicarse en silencio.
+4. Antes de mergear algo comportamental, pedí el pase de revisión independiente — `/codex:review --base main --background` con el plugin, el agente `diff-reviewer` sin él — y verificá que el revisor no sea el autor.
+
+Un ejemplo completo trabajado — spec de tarea, decisión de ruteo, hallazgos del revisor, ronda de fix, convergencia — vive en [docs/example-workflow.md](docs/example-workflow.md) (en inglés).
 
 ## La compuerta de gasto
 

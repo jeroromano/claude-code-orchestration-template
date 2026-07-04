@@ -7,6 +7,7 @@ This repository is a template, not a runtime library: its "code" is a set of Mar
 ## Start here
 
 - [README.md](README.md): what the template is, who it's for, install steps, and the design rationale.
+- [docs/example-workflow.md](docs/example-workflow.md): a worked example of one task moving through spec, delegation, independent review, and merge.
 - [CLAUDE.md](CLAUDE.md): the orchestration policy loaded every session - model routing, risk paths, review rules. The single source of truth for project-specific settings.
 - [AGENTS.md](AGENTS.md): orientation for AI coding agents working on this repository.
 
