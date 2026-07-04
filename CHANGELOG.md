@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.1.4] - 2026-07-04
+
 ### Added
 - `docs/example-workflow.md`: a worked end-to-end example - task spec, routing decision, fast-worker report, independent review, fix round, convergence, merge.
 - README (EN/ES): a "Who it's not for" paragraph, the expected shape of the `/agents` check after install, and a "First run" section linking the worked example.
@@ -34,7 +38,8 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.4
 [0.1.3]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.3
 [0.1.2]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.2
 [0.1.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.1
