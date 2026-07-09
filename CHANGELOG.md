@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.2.0] - 2026-07-09
+
 ### Added
 - GPT-5.6 Sol routing guidance across `CLAUDE.md`, the delegation-protocol skill and both READMEs: Sol is primarily the independent auditor of Claude-authored diffs (effort `high`; `xhigh` on risk paths; `max` only as an exceptional human-authorized escalation once the CLI supports it) and secondarily a spec-bound implementer via `/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>` (`high` only for hard bugs or multi-module work). `.codex/config.toml` documented as optional configuration - the template still ships none. Codex Ultra explicitly ruled out: the template is already the orchestration layer.
 - `docs/specs/gpt-5-6-sol-routing.md`: the approved spec for this change.
@@ -45,7 +49,8 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.2.0
 [0.1.4]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.4
 [0.1.3]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.3
 [0.1.2]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.2
