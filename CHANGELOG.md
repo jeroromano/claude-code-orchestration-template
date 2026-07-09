@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.2.1] - 2026-07-09
+
 Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0.
 
 ### Changed
@@ -58,7 +62,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.2.1
 [0.2.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.2.0
 [0.1.4]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.4
 [0.1.3]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.3
