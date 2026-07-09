@@ -2,6 +2,8 @@
 
 Status: approved 2026-07-09. Revised the same day after independent review (round 1): the authorship rule now explicitly covers the risk-path adversarial pass, and the plugin-presence gate stays explicit in CLAUDE.md's delegation bullet. Implements the human's routing decisions for GPT-5.6 Sol without breaking the template's clean degradation when the Codex plugin is absent.
 
+Revised again 2026-07-09 after the post-release Sol audit of v0.2.0: the rescue pin gains a model-unavailable degradation (Sol is a limited-access preview - rerun without `--model` or fall back to fast-worker); decision 8's unstated-author default is replaced by fail-closed UNKNOWN (assuming Claude-family could route a Codex-authored diff back to Codex on a risk path); the `max` limitation is re-attributed from the Codex CLI to the per-invocation plugin path; the README no longer implies reviews run on Sol without the optional config pin, and notes the trusted-repo condition for a project-level Codex config.
+
 ## Context
 
 The optional Codex integration now runs GPT-5.6 Sol. The template must state Sol's role, its effort ladder, and - critically - fix an existing ambiguity: `CLAUDE.md`'s review gate routed *every* behavioral branch to `/codex:review` regardless of who authored it, while the delegation-protocol skill (§3) already required Codex-authored code to be reviewed by diff-reviewer or a human. Read together, CLAUDE.md could send a Codex-authored branch to Codex for approval.
@@ -14,7 +16,7 @@ Interface facts, verified against openai/codex-plugin-cc 1.0.5 and Codex CLI 0.1
 ## Decisions
 
 1. **Roles.** Claude (Fable when escalated) owns architecture, planning and specs; these are never delegated to Codex. Sol's primary role is independent audit of Claude-authored diffs; its secondary role is implementing already-approved specs.
-2. **Review effort ladder (Sol).** `high` for normal important reviews; `xhigh` for risk paths; `max` only as an exceptional, explicitly human-authorized escalation *when the CLI supports it* (it does not in 0.144.0). Since `/codex:review` takes no flags, effort is set via `.codex/config.toml`.
+2. **Review effort ladder (Sol).** `high` for normal important reviews; `xhigh` for risk paths; `max` only as an exceptional, explicitly human-authorized escalation *when the invocation path exposes it* (the plugin's `--effort` parser and the documented TOML values stop at `xhigh` in the verified versions). Since `/codex:review` takes no flags, effort is set via `.codex/config.toml`.
 3. **Writing effort ladder (Sol).** `medium` by default; `high` only for hard bugs or multi-module work. Canonical command:
    `/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>`
 4. **No Ultra.** Codex Ultra is multi-agent orchestration; this template is already the orchestration layer. Using it would duplicate the system and multiply spend on both pools.
@@ -25,7 +27,7 @@ Interface facts, verified against openai/codex-plugin-cc 1.0.5 and Codex CLI 0.1
    model = "gpt-5.6-sol"
    model_reasoning_effort = "high"
    ```
-8. **Author-aware diff-reviewer.** Codex-authored diffs become an explicit trigger; the same-family blind-spot warning becomes conditional on the diff's author. When authorship is not stated in the prompt, diff-reviewer assumes Claude authorship and says so (fail-safe: the warning fires when in doubt).
+8. **Author-aware diff-reviewer.** Codex-authored diffs become an explicit trigger; the same-family blind-spot warning becomes conditional on the diff's author. When authorship is not stated in the prompt, diff-reviewer treats it as UNKNOWN and fails closed: the same-family caveat fires AND no Codex routing is recommended until the author is stated (revised 2026-07-09 - the original "assume Claude-family" default could have routed a Codex-authored diff back to Codex on a risk path).
 
 ## Invariants (must survive the change)
 

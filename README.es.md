@@ -71,7 +71,7 @@ Una vez que `/agents` liste los cuatro workers, ejercitá el protocolo una vez c
 
 1. Elegí una tarea chica y completamente especificada — un test unitario para agregar, un rename, una pasada de docstrings.
 2. Pedila a través del protocolo: *"Delegá a fast-worker: \<tarea\>. Seguí el protocolo de delegación."*
-3. Tres comportamientos prueban que el template está vivo: una spec de tarea (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) aparece *antes* de cualquier delegación, el diff vuelve con un reporte en vez de aplicarse en silencio, y el reporte abre con una línea de provenance que nombra el modelo que el harness realmente resolvió.
+3. Tres comportamientos prueban que el template está vivo: una spec de tarea (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) aparece *antes* de cualquier delegación, el diff vuelve con un reporte en vez de aplicarse en silencio, y el reporte abre con una línea de provenance — que nombra el modelo que el harness realmente resolvió cuando el contexto del subagent lo declara, o dice "model not reported by harness" cuando no (el fallback honesto es parte del protocolo, no una falla).
 4. Antes de mergear algo comportamental, pedí el pase de revisión independiente y verificá que el revisor no sea el autor: `/codex:review --base main --background` para trabajo escrito por Claude (con el plugin), el agente `diff-reviewer` para trabajo escrito por Codex o cuando el plugin no está.
 
 Un ejemplo completo trabajado — spec de tarea, decisión de ruteo, hallazgos del revisor, ronda de fix, convergencia — vive en [docs/example-workflow.md](docs/example-workflow.md) (en inglés).
@@ -88,7 +88,7 @@ Un ejemplo completo trabajado — spec de tarea, decisión de ruteo, hallazgos d
 
 **Verificá que el pin realmente resolvió.** Después de instalar, chequeá `/agents`: los valores de modelo del frontmatter se validan contra el allowlist de modelos de tu organización, y un valor excluido o no disponible se saltea en silencio — el subagent corre entonces en el modelo *heredado*. La compuerta controla *cuándo* corre el premium; solo `/agents` confirma *sobre qué* corre.
 
-**Provenance y gasto en cada reporte.** Los reportes delegados abren con una línea de provenance — el agente, el modelo que el harness realmente resolvió (un valor *verified*: se cita del propio contexto del subagent, así un pin salteado en silencio aparece por invocación, complementando `/agents`), y el tier de effort (pinneado o heredado). El orquestador cierra cada resultado con el uso de tokens reportado por el harness para esa delegación y un total acumulado. Las líneas de Codex van rotuladas *requested* (flags de rescue) o *configured* (`.codex/config.toml`, o "CLI default (unknown)" si no existe): el CLI de Codex no ecoa ni modelo ni consumo en runtime, y su gasto de tokens solo se ve en tu página de uso del lado de OpenAI. Ningún reporte convierte tokens a plata — las tarifas rotan; si los tokens de Claude salieron de la cuota del plan o de créditos de API sigue siendo un chequeo en runtime vía `/usage`.
+**Provenance y gasto en cada reporte.** Los reportes delegados abren con una línea de provenance — el agente, el modelo que el harness realmente resolvió (un valor *verified* sólo cuando el propio contexto del subagent lo declara — comportamiento observado del harness, no un contrato documentado; si no, el agente escribe "model not reported by harness". Cuando está presente, la cita expone un pin salteado en silencio por invocación, complementando `/agents`), y el tier de effort (pinneado o heredado). El orquestador cierra cada resultado con el uso de tokens reportado por el harness para esa delegación y un total acumulado — o "usage not reported by harness" cuando el runtime no lo expone; nada se infiere. Las líneas de Codex van rotuladas *requested* (flags de rescue) o *configured* (`.codex/config.toml`, o "CLI default (unknown)" si no existe): el CLI de Codex no ecoa ni modelo ni consumo en runtime, y su gasto de tokens solo se ve en tu página de uso del lado de OpenAI. Ningún reporte convierte tokens a plata — las tarifas rotan; si los tokens de Claude salieron de la cuota del plan o de créditos de API sigue siendo un chequeo en runtime vía `/usage`.
 
 ## Opcional: plugin de Codex de OpenAI (revisión cross-family)
 
@@ -110,18 +110,20 @@ Sin el plugin nada se rompe: el protocolo rutea las revisiones al `diff-reviewer
 
 ### GPT-5.6 Sol: ruteo de modelo y effort
 
-Con el plugin instalado, este template corre Codex como **GPT-5.6 Sol** en dos roles, en este orden:
+Con el plugin instalado, este template rutea el trabajo de Codex a **GPT-5.6 Sol** en dos roles, en este orden:
 
-- **Auditor independiente (primario).** Sol revisa diffs escritos por Claude. Effort: `high` para revisiones normales, `xhigh` para revisiones de risk paths, y `max` sólo como escalación excepcional autorizada explícitamente por un humano cuando el CLI lo soporte (Codex CLI 0.144.x todavía no lo soporta).
+- **Auditor independiente (primario).** Sol revisa diffs escritos por Claude. Effort: `high` para revisiones normales, `xhigh` para revisiones de risk paths, y `max` sólo como escalación excepcional autorizada explícitamente por un humano — `max` existe en Codex, pero el camino actual del plugin no lo expone por invocación (`/codex:rescue --effort` y los valores documentados de `.codex/config.toml` llegan hasta `xhigh`).
 - **Implementador atado a spec (secundario).** Sol escribe únicamente implementaciones de una spec ya aprobada — nunca arquitectura, planes ni las specs mismas; eso queda en Claude (Fable si se escaló). Subí a `--effort high` sólo para bugs difíciles o trabajo multi-módulo:
 
 ```
 /codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <spec aprobada>
 ```
 
+GPT-5.6 Sol es un preview de acceso limitado: tener cuenta de Codex no garantiza tenerlo. Si el CLI rechaza `gpt-5.6-sol`, degradá en vez de frenar — reejecutá el rescue sin `--model` (aplica el default de tu CLI) o ruteá la tarea a `fast-worker`. Las revisiones no se ven afectadas en ningún caso: corren sobre lo que resuelva tu configuración de Codex.
+
 El revisor se elige siempre por autoría — ningún modelo aprueba su propio diff: escrito por Claude -> revisión Codex; escrito por Codex -> el `diff-reviewer` local o un humano; autoría mixta -> cada porción la revisa un agente que no la escribió.
 
-`/codex:review` no acepta flags de modelo ni effort por invocación — hereda la configuración de tu Codex CLI. Este template no incluye ningún `.codex/config.toml`; si querés fijar Sol para las revisiones, agregalo vos:
+`/codex:review` no acepta flags de modelo ni effort por invocación — hereda la configuración de tu Codex CLI. Este template no incluye ningún `.codex/config.toml`, así que de fábrica las revisiones corren en el modelo default de tu CLI; corren en Sol a `high` recién cuando agregás vos el pin de abajo (ojo: según la documentación de Codex, un config a nivel de proyecto sólo se carga en repos que el CLI marca como confiables):
 
 ```toml
 model = "gpt-5.6-sol"

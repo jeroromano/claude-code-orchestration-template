@@ -66,7 +66,7 @@ Once `/agents` lists the four workers, exercise the protocol once on something h
 
 1. Pick a small, fully-specified task - a unit test to add, a rename, a docstring pass.
 2. Ask for it through the protocol: *"Delegate to fast-worker: \<task\>. Follow the delegation protocol."*
-3. Three behaviors prove the template is live: a task spec (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) appears *before* any delegation, the diff comes back with a report instead of being silently applied, and the report opens with a provenance line naming the model the harness actually resolved.
+3. Three behaviors prove the template is live: a task spec (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) appears *before* any delegation, the diff comes back with a report instead of being silently applied, and the report opens with a provenance line - naming the model the harness actually resolved when the subagent's context states it, or "model not reported by harness" when it does not (the honest fallback is part of the protocol, not a failure).
 4. Before merging anything behavioral, ask for the independent review pass and check that the reviewer is not the author: `/codex:review --base main --background` for Claude-authored work (with the plugin), the `diff-reviewer` agent for Codex-authored work or when the plugin is absent.
 
 A complete worked example - task spec, routing decision, reviewer findings, fix round, convergence - lives in [docs/example-workflow.md](docs/example-workflow.md).
@@ -83,7 +83,7 @@ No Fable access? Edit one marked line in the agent (`model:`) or delete it - rou
 
 **Verify the pin actually resolved.** After install, check `/agents`: frontmatter model values are validated against your organization's model allowlist, and an excluded or unavailable value is silently skipped - the subagent then runs on the *inherited* model. The gate controls *when* premium runs; only `/agents` confirms *what* it runs on.
 
-**Provenance and spend in every report.** Delegated reports open with a provenance line - the agent, the model the harness actually resolved (a *verified* value: it is quoted from the subagent's own context, so a silently-skipped pin shows up per invocation, complementing `/agents`), and the effort tier (pinned or inherited). The orchestrator closes each result with the harness-reported token usage for that delegation and a running total. Codex lines are labeled *requested* (rescue flags) or *configured* (`.codex/config.toml`, or "CLI default (unknown)" when none exists) instead: the Codex CLI echoes neither model nor usage at runtime, and its token spend is visible only on your OpenAI-side usage page. No report converts tokens to money - rates rot; whether Claude tokens drew from plan quota or API credits stays a runtime check via `/usage`.
+**Provenance and spend in every report.** Delegated reports open with a provenance line - the agent, the model the harness actually resolved (a *verified* value only when the subagent's own context states it - observed harness behavior, not a documented contract; the agent otherwise writes "model not reported by harness". When present, the quote exposes a silently-skipped pin per invocation, complementing `/agents`), and the effort tier (pinned or inherited). The orchestrator closes each result with the harness-reported token usage for that delegation and a running total - or "usage not reported by harness" when the runtime does not expose it; nothing is inferred. Codex lines are labeled *requested* (rescue flags) or *configured* (`.codex/config.toml`, or "CLI default (unknown)" when none exists) instead: the Codex CLI echoes neither model nor usage at runtime, and its token spend is visible only on your OpenAI-side usage page. No report converts tokens to money - rates rot; whether Claude tokens drew from plan quota or API credits stays a runtime check via `/usage`.
 
 ## Optional: OpenAI Codex plugin (cross-family review)
 
@@ -108,18 +108,20 @@ Without the plugin nothing breaks: the protocol routes reviews to the local `dif
 
 ### GPT-5.6 Sol: model and effort routing
 
-With the plugin installed, this template runs Codex as **GPT-5.6 Sol** in two roles, in this order:
+With the plugin installed, this template routes Codex work to **GPT-5.6 Sol** in two roles, in this order:
 
-- **Independent auditor (primary).** Sol reviews Claude-authored diffs. Effort: `high` for normal reviews, `xhigh` for risk-path reviews, and `max` only as an exceptional, explicitly human-authorized escalation when the CLI supports it (Codex CLI 0.144.x does not yet).
+- **Independent auditor (primary).** Sol reviews Claude-authored diffs. Effort: `high` for normal reviews, `xhigh` for risk-path reviews, and `max` only as an exceptional, explicitly human-authorized escalation - `max` exists in Codex, but the current plugin path does not expose it per invocation (`/codex:rescue --effort` and the documented `.codex/config.toml` values stop at `xhigh`).
 - **Spec-bound implementer (secondary).** Sol writes only implementations of an already-approved spec - never architecture, plans, or the specs themselves; those stay with Claude (Fable when escalated). Raise to `--effort high` only for hard bugs or multi-module work:
 
 ```
 /codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>
 ```
 
+GPT-5.6 Sol is a limited-access preview: a Codex account does not guarantee it. If the CLI rejects `gpt-5.6-sol`, degrade instead of stalling - rerun the rescue without `--model` (your CLI default applies) or route the task to `fast-worker`. Reviews are unaffected either way: they run on whatever your Codex configuration resolves.
+
 The reviewer is always chosen by authorship - no model approves its own diff: Claude-authored -> Codex review; Codex-authored -> the local `diff-reviewer` or a human; mixed -> each portion reviewed by an agent that did not write it.
 
-`/codex:review` accepts no per-invocation model or effort flags - it inherits your Codex CLI configuration. This template ships no `.codex/config.toml`; if you want to pin Sol for reviews, add one yourself:
+`/codex:review` accepts no per-invocation model or effort flags - it inherits your Codex CLI configuration. This template ships no `.codex/config.toml`, so out of the box reviews run on your CLI's default model; they run on Sol at `high` only once you add the pin below yourself (note: per the Codex docs, a project-level config loads only in repos the CLI trusts):
 
 ```toml
 model = "gpt-5.6-sol"

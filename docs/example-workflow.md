@@ -40,7 +40,7 @@ The first row of the routing table in [SKILL.md](../.claude/skills/delegation-pr
 
 For contrast, the same task would route differently under different conditions:
 
-- **Codex rescue** - if this were a broader, already-approved implementation spec (not just tests) and the Codex plugin were installed, it would run there in the background instead: `/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>` (raise to `--effort high` only for hard bugs or multi-module work).
+- **Codex rescue** - if this were a broader, already-approved implementation spec (not just tests) and the Codex plugin were installed, it would run there in the background instead: `/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>` (raise to `--effort high` only for hard bugs or multi-module work). If the account lacks Sol - it is a limited-access preview - rerun without `--model` or fall back to fast-worker, per the skill's cost guards.
 - **deep-reasoner** - if the ask were one hard scoped question with no writing (for example, "why does `slugify()` mis-handle combining diacritics" as investigation, not tests), it would go to deep-reasoner.
 - **premium-reasoner** - only if the human authorizes premium spend and the orchestrator adds `PREMIUM-APPROVED` to the prompt for that specific invocation; the orchestrator never adds that token on its own initiative.
 
@@ -48,7 +48,7 @@ For contrast, the same task would route differently under different conditions:
 
 `fast-worker` returns a report, not a silently-applied diff. The exact wording varies by run, so treat the following as the expected shape, not a promised rendering:
 
-- Provenance: an opening line naming the agent, the model the harness actually resolved, and the effort tier - for example `Ran as: fast-worker on Sonnet 5 (claude-sonnet-5); effort: inherited (not visible at runtime)`.
+- Provenance: an opening line naming the agent, the model the harness actually resolved, and the effort tier - for example `Ran as: fast-worker on Sonnet 5 (claude-sonnet-5); effort: inherited (not visible at runtime)` - or "model not reported by harness" when the runtime does not state it; the fallback is the protocol working, not failing.
 - Changed files: the touched paths, which should be exactly `src/utils/slug.test.ts`.
 - Validation results: pass/fail for each command in VALIDATION.
 - Deviations from spec: normally "none".

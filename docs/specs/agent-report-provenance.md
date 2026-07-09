@@ -2,11 +2,13 @@
 
 Status: approved 2026-07-09. Revised the same day after independent review (APPROVE with concerns): both READMEs now label all three honesty tiers by name, carry the "CLI default (unknown)" fallback and point Codex spend at the OpenAI-side usage page; CLAUDE.md attributes the usage-closing action to the orchestrator explicitly. Companion to [gpt-5-6-sol-routing.md](gpt-5-6-sol-routing.md); ships in the same change-set.
 
+Revised again 2026-07-09 after the post-release Sol audit of v0.2.0: the harness facts below are point-in-time observations of one harness version, not documented contracts - reports carry *verified* values only when the harness actually states them, and degrade to explicit "model/usage not reported by harness" fallbacks otherwise; the unstated-author default changed from "assumed Claude-family" to fail-closed UNKNOWN (see the Sol routing spec); premium-reasoner's cost-notice-before-provenance order is now a declared exception to the first-line rule in skill §4.
+
 ## Context
 
 The protocol now selects reviewers by authorship, but reports do not say which model actually did the work, at what effort, or what it cost. The human wants every delegated report to carry that: "written by Fable at x effort", plus token spend, plus API credits if API billing was used instead of weekly plan usage.
 
-Facts verified on 2026-07-09 before designing this:
+Facts verified on 2026-07-09 before designing this (point-in-time observations, not documented contracts - every report degrades explicitly when they do not hold):
 
 - **Claude Code subagents see their resolved model.** A live probe of `fast-worker` found this statement in its runtime context: "You are powered by the model named Sonnet 5. The exact model ID is claude-sonnet-5." The harness injects the *resolved* model - so an agent quoting it also exposes, per invocation, the case where an organization allowlist silently skipped the frontmatter pin (previously detectable only via `/agents`).
 - **Claude Code subagents do NOT see their effort.** The same probe found no effort statement in context. Effort is reportable only as configuration: pinned in frontmatter (`premium-reasoner`: `high`) or "inherited (not visible at runtime)".
@@ -18,14 +20,14 @@ Facts verified on 2026-07-09 before designing this:
 
 1. **Provenance line, mandatory, first line of every delegated report.** Standard form:
    `Ran as: <agent-name> on <model name and ID exactly as the runtime context states them>; effort: <"pinned <value>" | "inherited (not visible at runtime)">`
-   For diff-reviewer it is `Reviewed by: ...` and also names the diff's author (from the prompt, or "unstated - assumed Claude-family"), completing the independence trail in one line.
+   For diff-reviewer it is `Reviewed by: ...` and also names the diff's author (from the prompt, or "unstated - treated as UNKNOWN (fail closed)"), completing the independence trail in one line.
 2. **Three honesty tiers, never conflated:**
    - *verified* - the model quoted from the subagent's own runtime context;
    - *requested* - Codex rescue's `--model`/`--effort` invocation flags (the CLI validates them but never echoes the runtime model);
    - *configured* - `/codex:review`'s inherited `.codex/config.toml` values, or "CLI default (unknown)" when the file is absent.
    The orchestrator composes the Codex lines, labeled with their tier.
 3. **Fail-safe against self-belief.** Agents quote the context statement verbatim or write "model not reported by harness". Never answer from training-data identity.
-4. **Spend reporting is an orchestrator duty** (agents cannot see their own token count): quote the harness-reported usage per delegation (`subagent_tokens`, tool uses, duration) and a running total per unit of work. Codex-side usage: state that the plugin runtime does not report it and point at the OpenAI-side usage page.
+4. **Spend reporting is an orchestrator duty** (agents cannot see their own token count): quote the harness-reported usage per delegation (tokens, tool uses, duration) when the runtime exposes it - otherwise "usage not reported by harness", never inferred - and a running total per unit of work. Codex-side usage: state that the plugin runtime does not report it and point at the OpenAI-side usage page.
 5. **Never convert tokens to money.** Rates are banned from this repo (they rot). Pool attribution (weekly plan quota vs API credits) stays a human runtime check via `/usage` - the same pattern as the premium-reasoner cost notice.
 
 ## Invariants

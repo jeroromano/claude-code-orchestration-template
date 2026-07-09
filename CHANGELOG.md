@@ -4,7 +4,16 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0.
+
+### Changed
+- `diff-reviewer` now fails closed on unstated authorship: UNKNOWN instead of assumed Claude-family. The same-family caveat still fires, but no Codex routing is recommended until the author is stated - so a Codex-authored diff can no longer be routed back to Codex by an authorship assumption (skill §3, diff-reviewer, both specs).
+- Degradation defined for the Sol rescue pin: GPT-5.6 Sol is a limited-access preview, so when the CLI rejects `--model gpt-5.6-sol` the protocol now says to rerun without `--model` (CLI default) or fall back to fast-worker (skill §2/§5, both READMEs, CLAUDE.md, example workflow).
+- Provenance and spend claims downgraded from harness guarantees to observed behavior: the resolved model and per-delegation usage are quoted only when the runtime reports them, with explicit "model/usage not reported by harness" fallbacks (skill §4, both READMEs, provenance spec, example workflow, `llms.txt`). Premium-reasoner's cost-notice-before-provenance order is now a declared exception to the first-line rule instead of an undeclared contradiction.
+
+### Fixed
+- The `max` effort limitation is attributed to the per-invocation plugin path (`/codex:rescue --effort` and the documented `.codex/config.toml` values stop at `xhigh`), no longer to the Codex CLI as a whole (CLAUDE.md, skill, both READMEs, Sol routing spec).
+- The README no longer implies reviews run on Sol out of the box: they run on the CLI's default model until the optional `.codex/config.toml` pin is added, and a project-level Codex config loads only in trusted repos.
 
 ## [0.2.0] - 2026-07-09
 

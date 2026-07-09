@@ -10,7 +10,7 @@
 ## Delegation
 Mechanics live in the `delegation-protocol` skill - use it for any delegation or review. Summary:
 - Mechanical, fully-specified work -> fast-worker agent.
-- Scoped implementation with an approved spec -> Codex rescue if the Codex plugin is installed (Sol, effort medium; high only for hard bugs or multi-module work), background; otherwise fast-worker. Exact command in the skill.
+- Scoped implementation with an approved spec -> Codex rescue if the Codex plugin is installed (Sol where the account has it - model-unavailable fallback in the skill §5; effort medium; high only for hard bugs or multi-module work), background; otherwise fast-worker. Exact command in the skill.
 - Sol's primary role is independent audit of Claude-authored diffs; writing is secondary and always spec-bound.
 - One hard scoped question -> deep-reasoner agent.
 - Beyond deep-reasoner -> premium-reasoner agent, ONLY with explicit human authorization per invocation: the orchestrator adds the token PREMIUM-APPROVED to the delegation prompt if and only if the human authorized premium spend for that question in this session. Never auto-delegate to it.
@@ -23,7 +23,7 @@ Mechanics live in the `delegation-protocol` skill - use it for any delegation or
   - Claude-authored -> `/codex:review --base main --background` if the Codex plugin is installed; otherwise the diff-reviewer agent. (FILL IN: replace `main` if this repo's default branch differs.)
   - Codex-authored -> the diff-reviewer agent or a human reviewer. Never Codex.
   - Mixed authorship -> each portion is reviewed by an agent that did not write it.
-- Sol review effort: high normally, xhigh on risk paths - set in `.codex/config.toml`, since `/codex:review` accepts no per-invocation model/effort flags; `max` only as an exceptional, human-authorized escalation when the CLI supports it.
+- Sol review effort: high normally, xhigh on risk paths - set in `.codex/config.toml`, since `/codex:review` accepts no per-invocation model/effort flags; `max` only as an exceptional, human-authorized escalation when the invocation path exposes it (the current plugin path does not).
 - Pure-doc changes with no runtime/behavioral surface may be self-merged; the `delegation-protocol` skill (§3) defines the threshold.
 - Risk-path changes additionally get an adversarial pass, chosen by the same authorship rule: `/codex:adversarial-review` for Claude-authored diffs; for Codex-authored diffs, diff-reviewer (or a human) with the focus text below - never Codex.
 - Never skip the second pass. Never enable the automatic review gate.
