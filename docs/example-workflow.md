@@ -40,7 +40,7 @@ The first row of the routing table in [SKILL.md](../.claude/skills/delegation-pr
 
 For contrast, the same task would route differently under different conditions:
 
-- **Codex rescue** - if this were a broader, already-approved implementation spec (not just tests) and the Codex plugin were installed, it would run there in the background instead.
+- **Codex rescue** - if this were a broader, already-approved implementation spec (not just tests) and the Codex plugin were installed, it would run there in the background instead: `/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>` (raise to `--effort high` only for hard bugs or multi-module work).
 - **deep-reasoner** - if the ask were one hard scoped question with no writing (for example, "why does `slugify()` mis-handle combining diacritics" as investigation, not tests), it would go to deep-reasoner.
 - **premium-reasoner** - only if the human authorizes premium spend and the orchestrator adds `PREMIUM-APPROVED` to the prompt for that specific invocation; the orchestrator never adds that token on its own initiative.
 
@@ -48,12 +48,13 @@ For contrast, the same task would route differently under different conditions:
 
 `fast-worker` returns a report, not a silently-applied diff. The exact wording varies by run, so treat the following as the expected shape, not a promised rendering:
 
+- Provenance: an opening line naming the agent, the model the harness actually resolved, and the effort tier - for example `Ran as: fast-worker on Sonnet 5 (claude-sonnet-5); effort: inherited (not visible at runtime)`.
 - Changed files: the touched paths, which should be exactly `src/utils/slug.test.ts`.
 - Validation results: pass/fail for each command in VALIDATION.
 - Deviations from spec: normally "none".
 - Out-of-scope observations: anything noticed but not touched - for example, "`slug.ts` has no JSDoc; unrelated to this task, not changed."
 
-The orchestrator checks the diff against EXPECTED DIFF SHAPE first - one file, roughly 40-60 lines - because drift is cheaper to catch by shape than by reading the whole diff.
+The orchestrator checks the diff against EXPECTED DIFF SHAPE first - one file, roughly 40-60 lines - because drift is cheaper to catch by shape than by reading the whole diff. When presenting the result, the orchestrator also quotes the harness-reported token usage for the delegation (and a running total across worker and review rounds) - raw tokens only, never converted to money.
 
 A deviation might look like: the worker also touched `slug.ts` to add a null check "while it was in there." That is outside ALLOWED FILES, even if well-intentioned, and the extra file alone breaks the expected shape before anyone reads a line. The orchestrator rejects the delta with a note of what changed and re-delegates with the scope restated - it does not quietly keep the extra fix, because that would hide drift from whoever reviews next.
 
@@ -62,6 +63,8 @@ A deviation might look like: the worker also touched `slug.ts` to add a null che
 Tests execute - a wrong assertion green-lights a bug with nobody in the loop - which is exactly the criterion SKILL.md §3 sets for the mandatory independent pass: a defect that can act unmediated. So this diff gets reviewed, and the reviewer must not be the author - `fast-worker` wrote the tests, so someone else has to check them.
 
 Route: `/codex:review --base main --background` if the Codex plugin is installed; otherwise the `diff-reviewer` agent. Without the plugin, the reviewer's verdict will honestly flag that same-family review is the weaker guarantee - it says so rather than pretending otherwise.
+
+That route holds because the author is Claude-family: fast-worker wrote the tests, so Codex review is the cross-family independent pass. Had the diff been Codex-authored instead - a rescue implementation - the review would route to the diff-reviewer agent or a human, never back to Codex: no agent approves its own authorship. The reviewer's verdict opens with the independence trail in one line - reviewed-by (agent and resolved model) and diff-authored-by - so the no-self-review rule stays auditable at a glance.
 
 This task's spec carries `RISK PATH: no`, so only this pre-merge pass applies. A change on a risk path - auth, payments, migrations, anything reading or writing user data, per `CLAUDE.md`'s Risk paths section - would additionally get an adversarial pass with the project-specific focus text from that section.
 

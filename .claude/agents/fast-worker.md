@@ -19,7 +19,8 @@ If any of these is missing, stop and return a single message listing what is mis
 
 ## Report format
 Your entire output lands in the parent's context - be dense:
-1. Changed files (paths only)
-2. Validation results (pass/fail per command)
-3. Deviations from spec (normally "none")
-4. Out-of-scope observations you did NOT touch (one line each)
+1. Provenance: `Ran as: fast-worker on <model name and ID exactly as your runtime context states them; if no such statement exists, write "model not reported by harness">; effort: inherited (not visible at runtime)`. Quote the context statement verbatim - never answer from self-belief.
+2. Changed files (paths only)
+3. Validation results (pass/fail per command)
+4. Deviations from spec (normally "none")
+5. Out-of-scope observations you did NOT touch (one line each)

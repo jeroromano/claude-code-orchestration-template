@@ -4,7 +4,14 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- GPT-5.6 Sol routing guidance across `CLAUDE.md`, the delegation-protocol skill and both READMEs: Sol is primarily the independent auditor of Claude-authored diffs (effort `high`; `xhigh` on risk paths; `max` only as an exceptional human-authorized escalation once the CLI supports it) and secondarily a spec-bound implementer via `/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>` (`high` only for hard bugs or multi-module work). `.codex/config.toml` documented as optional configuration - the template still ships none. Codex Ultra explicitly ruled out: the template is already the orchestration layer.
+- `docs/specs/gpt-5-6-sol-routing.md`: the approved spec for this change.
+- Provenance and spend disclosure in delegated reports: every agent report opens with a provenance line (agent, the model actually resolved by the harness - quoted from the subagent's runtime context, exposing silently-skipped pins per invocation - and effort, pinned or inherited); diff-reviewer's line also names the diff's author, completing the independence trail. The orchestrator quotes harness-reported token usage per delegation plus a running total. Codex values are labeled requested (rescue flags) or configured (`.codex/config.toml`) - the Codex CLI echoes neither model nor usage; tokens are never converted to money, and pool attribution (plan quota vs API credits) stays with `/usage`. Spec: `docs/specs/agent-report-provenance.md`.
+
+### Changed
+- Reviewer selection is now authorship-aware in `CLAUDE.md`'s review gate and the skill's routing table (including the risk-path adversarial pass): Claude-authored -> Codex review; Codex-authored -> diff-reviewer or human; mixed -> each portion reviewed by an agent that did not write it. Codex never approves its own diffs. This resolves the ambiguity between `CLAUDE.md` (which routed every behavioral branch to `/codex:review`) and the skill's §3 independence rule.
+- `diff-reviewer`: Codex-authored diffs added as an explicit trigger, and the same-family blind-spot warning now depends on the diff's author (it does not apply when the diff is Codex-authored - the local pass is then the cross-family one).
 
 ## [0.1.4] - 2026-07-04
 

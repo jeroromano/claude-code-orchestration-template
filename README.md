@@ -66,8 +66,8 @@ Once `/agents` lists the four workers, exercise the protocol once on something h
 
 1. Pick a small, fully-specified task - a unit test to add, a rename, a docstring pass.
 2. Ask for it through the protocol: *"Delegate to fast-worker: \<task\>. Follow the delegation protocol."*
-3. Two behaviors prove the template is live: a task spec (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) appears *before* any delegation, and the diff comes back with a report instead of being silently applied.
-4. Before merging anything behavioral, ask for the independent review pass - `/codex:review --base main --background` with the plugin, the `diff-reviewer` agent without it - and check that the reviewer is not the author.
+3. Three behaviors prove the template is live: a task spec (GOAL / ALLOWED FILES / ACCEPTANCE / VALIDATION...) appears *before* any delegation, the diff comes back with a report instead of being silently applied, and the report opens with a provenance line naming the model the harness actually resolved.
+4. Before merging anything behavioral, ask for the independent review pass and check that the reviewer is not the author: `/codex:review --base main --background` for Claude-authored work (with the plugin), the `diff-reviewer` agent for Codex-authored work or when the plugin is absent.
 
 A complete worked example - task spec, routing decision, reviewer findings, fix round, convergence - lives in [docs/example-workflow.md](docs/example-workflow.md).
 
@@ -82,6 +82,8 @@ A complete worked example - task spec, routing decision, reviewer findings, fix 
 No Fable access? Edit one marked line in the agent (`model:`) or delete it - routing degrades cleanly. If you rename the agent or token, run `git grep -l PREMIUM-APPROVED` and update every file it returns in the same commit.
 
 **Verify the pin actually resolved.** After install, check `/agents`: frontmatter model values are validated against your organization's model allowlist, and an excluded or unavailable value is silently skipped - the subagent then runs on the *inherited* model. The gate controls *when* premium runs; only `/agents` confirms *what* it runs on.
+
+**Provenance and spend in every report.** Delegated reports open with a provenance line - the agent, the model the harness actually resolved (a *verified* value: it is quoted from the subagent's own context, so a silently-skipped pin shows up per invocation, complementing `/agents`), and the effort tier (pinned or inherited). The orchestrator closes each result with the harness-reported token usage for that delegation and a running total. Codex lines are labeled *requested* (rescue flags) or *configured* (`.codex/config.toml`, or "CLI default (unknown)" when none exists) instead: the Codex CLI echoes neither model nor usage at runtime, and its token spend is visible only on your OpenAI-side usage page. No report converts tokens to money - rates rot; whether Claude tokens drew from plan quota or API credits stays a runtime check via `/usage`.
 
 ## Optional: OpenAI Codex plugin (cross-family review)
 
@@ -98,11 +100,35 @@ Requirements: Claude Code, Node.js 18.18+ (the plugin can install the Codex CLI 
 not rot. Rot = a statement time makes FALSE (prices, quotas, regimes): those are banned from this repo.
 Provenance = a statement time makes OLD (when compatibility was last verified): its whole function is to
 let the reader judge staleness. Update the stamp when you re-verify; never remove it. -->
-**Interface coupling, declared:** this template's routing table references `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`, `/codex:status` and `/codex:result`, tested against [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) as of July 2026 (Codex CLI 0.142.x). If the plugin renames commands, update the skill's routing table.
+**Interface coupling, declared:** this template's routing table references `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`, `/codex:status` and `/codex:result`, tested against [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) as of July 2026 (Codex CLI 0.144.x). If the plugin renames commands, update the skill's routing table.
 
 Without the plugin nothing breaks: the protocol routes reviews to the local `diff-reviewer` instead - by instruction in the routing table, not by interception - and its verdict will honestly note that same-family review is the weaker guarantee.
 
 **Do not enable the plugin's automatic review gate as a default.** It registers a Stop hook that can loop Claude and Codex against each other and drain both quota pools. Review manually, at branch level: `/codex:review --base main --background` (replace `main` with your default branch if it differs).
+
+### GPT-5.6 Sol: model and effort routing
+
+With the plugin installed, this template runs Codex as **GPT-5.6 Sol** in two roles, in this order:
+
+- **Independent auditor (primary).** Sol reviews Claude-authored diffs. Effort: `high` for normal reviews, `xhigh` for risk-path reviews, and `max` only as an exceptional, explicitly human-authorized escalation when the CLI supports it (Codex CLI 0.144.x does not yet).
+- **Spec-bound implementer (secondary).** Sol writes only implementations of an already-approved spec - never architecture, plans, or the specs themselves; those stay with Claude (Fable when escalated). Raise to `--effort high` only for hard bugs or multi-module work:
+
+```
+/codex:rescue --fresh --background --model gpt-5.6-sol --effort medium <approved spec>
+```
+
+The reviewer is always chosen by authorship - no model approves its own diff: Claude-authored -> Codex review; Codex-authored -> the local `diff-reviewer` or a human; mixed -> each portion reviewed by an agent that did not write it.
+
+`/codex:review` accepts no per-invocation model or effort flags - it inherits your Codex CLI configuration. This template ships no `.codex/config.toml`; if you want to pin Sol for reviews, add one yourself:
+
+```toml
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+```
+
+Raise `model_reasoning_effort` to `"xhigh"` for a risk-path review, then set it back.
+
+**Do not use Ultra.** Codex Ultra is multi-agent orchestration; this template is already the orchestration layer, so Ultra would duplicate it and multiply spend on both quota pools.
 
 ## Security note
 
