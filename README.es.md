@@ -134,6 +134,18 @@ Subí `model_reasoning_effort` a `"xhigh"` para una revisión de risk path, y de
 
 **No uses Ultra.** Codex Ultra es orquestación multiagente; este template ya es la capa de orquestación, así que Ultra la duplicaría y multiplicaría el gasto en ambos pools de cuota.
 
+### Windows nativo: las revisiones viajan como tasks inline
+
+En Windows nativo el sandbox de Codex no puede spawnear procesos (verificado en Windows 11, julio de 2026, plugin 1.0.6 / Codex CLI 0.144.0): todo comando que intenta un job de `/codex:review` o `/codex:adversarial-review` sale con -1, y el job queda "running" colgado indefinidamente en vez de fallar. El camino de tasks no se ve afectado — un prompt que lleva todo adentro no necesita el sandbox.
+
+Por eso el template hace configurable el transporte de review — un bullet en el review gate de `CLAUDE.md`, default `auto`:
+
+- `auto` — `direct` en todas partes salvo Windows nativo, donde resuelve a `inline-task`.
+- `direct` — los dos comandos de arriba, exactamente como antes.
+- `inline-task` — Claude computa el diff localmente, lo embebe en un prompt read-only de `/codex:rescue` (`--effort high`; `xhigh` para la pasada de risk path; nunca `--write`, nunca `minimal` — Sol lo rechaza) con un contrato explícito de "analizá solo este diff, no ejecutes nada, no pidas nada", divide diffs de más de ~50 KB por límites de archivo, aplica un deadline con limpieza vía `/codex:cancel` para que ningún job de review quede colgado, y después valida cada finding contra el repositorio completo (confirmado / descartado / necesita decisión de diseño — preservando verbatim los findings y el veredicto original del reviewer) antes de reportar. Mecánica completa: skill delegation-protocol §6.
+
+Quién revisa no cambia nunca — el transporte solo cambia cómo se entrega una revisión destinada a Codex. Las plataformas no-Windows conservan el comportamiento de hoy exactamente. Cuando una actualización del plugin/CLI arregle el sandbox (una revisión de prueba sobre un diff trivial termina dentro de su deadline), poné la opción en `direct`.
+
 ## Nota de seguridad
 
 Codex corre en infraestructura de OpenAI: cada tarea o revisión delegada embarca allí el código tocado. Nunca delegues secretos, `.env*`, credenciales, datos de clientes ni fixtures con datos reales. Para repos confidenciales o de clientes, adaptá la sección **Data boundary** de `CLAUDE.md`: `diff-reviewer` local por defecto, Codex opt-in por tarea.

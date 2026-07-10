@@ -27,7 +27,7 @@ This repository is a template, not a runtime library: its "code" is a set of Mar
 - [Model routing](CLAUDE.md): cheap models for volume, expensive models for leverage (planning and diff review), a different model family where independence matters.
 - [Spend gates](.claude/agents/premium-reasoner.md): premium reasoning is refused unless a human adds the `PREMIUM-APPROVED` token; costs are disclosed at runtime rather than hardcoded, so the template never goes stale on prices. Every delegated report opens with a provenance line (agent, harness-resolved model when reported, effort) and carries harness-reported token usage when the runtime exposes it.
 - [Review gates](.claude/skills/delegation-protocol/SKILL.md): an independent diff review (the author is never the reviewer) before merging behavioral changes; the exact self-merge threshold is defined here in the delegation-protocol skill.
-- [Codex integration (optional)](README.md): routes review of Claude-authored diffs to the OpenAI Codex CLI (GPT-5.6 Sol) for cross-family validation; Codex-authored diffs go to the local `diff-reviewer` or a human instead; degrades cleanly to `diff-reviewer` when the plugin is absent.
+- [Codex integration (optional)](README.md): routes review of Claude-authored diffs to the OpenAI Codex CLI (GPT-5.6 Sol) for cross-family validation; Codex-authored diffs go to the local `diff-reviewer` or a human instead; degrades cleanly to `diff-reviewer` when the plugin is absent. Delivery goes through a configurable review transport: on native Windows, reviews ship as inline diffs over the read-only task path (`inline-task`), because the direct review commands hang there (July 2026).
 
 ## Optional
 

@@ -24,6 +24,7 @@ Mechanics live in the `delegation-protocol` skill - use it for any delegation or
   - Codex-authored -> the diff-reviewer agent or a human reviewer. Never Codex.
   - Mixed authorship -> each portion is reviewed by an agent that did not write it.
 - Sol review effort: high normally, xhigh on risk paths - set in `.codex/config.toml`, since `/codex:review` accepts no per-invocation model/effort flags; `max` only as an exceptional, human-authorized escalation when the invocation path exposes it (the current plugin path does not).
+- Review transport: `auto` | `direct` | `inline-task` - this repo uses `auto`. `direct` is the two commands above; `inline-task` ships the locally-computed diff inside a read-only `/codex:rescue` prompt instead (mechanics: delegation-protocol skill §6). On native Windows `auto` resolves to `inline-task`: the direct commands hang there - the Codex sandbox cannot spawn processes (verified on Windows 11, July 2026, plugin 1.0.6 / CLI 0.144.0). Set `direct` once a probe review completes after a sandbox fix.
 - Pure-doc changes with no runtime/behavioral surface may be self-merged; the `delegation-protocol` skill (§3) defines the threshold.
 - Risk-path changes additionally get an adversarial pass, chosen by the same authorship rule: `/codex:adversarial-review` for Claude-authored diffs; for Codex-authored diffs, diff-reviewer (or a human) with the focus text below - never Codex.
 - Never skip the second pass. Never enable the automatic review gate.

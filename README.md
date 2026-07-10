@@ -132,6 +132,18 @@ Raise `model_reasoning_effort` to `"xhigh"` for a risk-path review, then set it 
 
 **Do not use Ultra.** Codex Ultra is multi-agent orchestration; this template is already the orchestration layer, so Ultra would duplicate it and multiply spend on both quota pools.
 
+### Native Windows: reviews ship as inline tasks
+
+On native Windows the Codex sandbox cannot spawn processes (verified on Windows 11, July 2026, plugin 1.0.6 / Codex CLI 0.144.0): every command a `/codex:review` or `/codex:adversarial-review` job attempts exits -1, and the job hangs "running" indefinitely instead of failing. The task path is unaffected - prompts that carry everything need no sandbox.
+
+The template therefore makes the review transport configurable - one bullet in `CLAUDE.md`'s review gate, default `auto`:
+
+- `auto` - `direct` everywhere except native Windows, where it resolves to `inline-task`.
+- `direct` - the two commands above, exactly as before.
+- `inline-task` - Claude computes the diff locally, embeds it in a read-only `/codex:rescue` prompt (`--effort high`; `xhigh` for the risk-path pass; never `--write`, never `minimal` - Sol rejects it) with an explicit "analyze only this diff, run nothing, request nothing" contract, splits diffs over ~50 KB at file boundaries, applies a deadline with `/codex:cancel` cleanup so no review job is left hanging, and then validates every finding against the full repository (confirmed / discarded / needs design decision - preserving the reviewer's original findings and verdict verbatim) before reporting. Full mechanics: delegation-protocol skill §6.
+
+Who reviews never changes - the transport only changes how a Codex-bound review is delivered. Non-Windows platforms keep today's behavior exactly. When a plugin/CLI update fixes the sandbox (a probe review on a trivial diff completes within its deadline), set the knob to `direct`.
+
 ## Security note
 
 Codex runs on OpenAI infrastructure: every delegated task or review ships the touched code there. Never delegate secrets, `.env*`, credentials, customer data or real-data fixtures. For confidential or client repos, adapt the **Data boundary** section in `CLAUDE.md`: local `diff-reviewer` by default, Codex opt-in per task.

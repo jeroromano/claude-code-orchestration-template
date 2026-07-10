@@ -4,7 +4,11 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- Review transport knob in `CLAUDE.md`'s review gate (`auto | direct | inline-task`, default `auto`) and the inline-task procedure as delegation-protocol skill §6: diff computed locally (`git merge-base` scope, so committed and uncommitted work both ship; mixed-authorship branches scoped to the Claude-authored paths) and embedded in a read-only, background `/codex:rescue` prompt (effort pinned per invocation: `high`, `xhigh` on risk paths; never `--write`, never `minimal` - Sol rejects it), a no-commands/no-files contract with a collision-safe delimiter, file-boundary splitting above ~50 KB (54 KB verified; single oversized files route to diff-reviewer), a per-chunk deadline enforced against recorded job IDs with `/codex:cancel` cleanup so no review job is left hanging, and mandatory Claude-side validation of every finding against the full repository (confirmed / discarded / needs design decision; the reviewer's original findings and verdict are preserved verbatim, disputed findings and blockers are cleared only by the human, fixes are never auto-applied). Spec: `docs/specs/review-transport.md`.
+
+### Fixed
+- The review gate no longer stalls on native Windows: `auto` routes reviews there through `inline-task` instead of `/codex:review` / `/codex:adversarial-review`, whose sandbox cannot spawn processes (every command exits -1 and the job hangs; verified on Windows 11, July 2026, plugin 1.0.6 / Codex CLI 0.144.0). Who reviews is unchanged - only the delivery of Codex-bound reviews moves; non-Windows platforms keep the previous behavior exactly.
 
 ## [0.2.1] - 2026-07-09
 

@@ -62,7 +62,7 @@ A deviation might look like: the worker also touched `slug.ts` to add a null che
 
 Tests execute - a wrong assertion green-lights a bug with nobody in the loop - which is exactly the criterion SKILL.md §3 sets for the mandatory independent pass: a defect that can act unmediated. So this diff gets reviewed, and the reviewer must not be the author - `fast-worker` wrote the tests, so someone else has to check them.
 
-Route: `/codex:review --base main --background` if the Codex plugin is installed; otherwise the `diff-reviewer` agent. Without the plugin, the reviewer's verdict will honestly flag that same-family review is the weaker guarantee - it says so rather than pretending otherwise.
+Route: `/codex:review --base main --background` if the Codex plugin is installed; otherwise the `diff-reviewer` agent. (On native Windows the review transport ships this same review as an inline-task - the diff embedded in a read-only `/codex:rescue` prompt - per SKILL.md §6; the reviewer and the authorship rule do not change.) Without the plugin, the reviewer's verdict will honestly flag that same-family review is the weaker guarantee - it says so rather than pretending otherwise.
 
 That route holds because the author is Claude-family: fast-worker wrote the tests, so Codex review is the cross-family independent pass. Had the diff been Codex-authored instead - a rescue implementation - the review would route to the diff-reviewer agent or a human, never back to Codex: no agent approves its own authorship. The reviewer's verdict opens with the independence trail in one line - reviewed-by (agent and resolved model) and diff-authored-by - so the no-self-review rule stays auditable at a glance.
 
