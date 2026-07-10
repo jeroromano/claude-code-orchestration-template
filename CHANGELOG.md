@@ -4,7 +4,14 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+Changes below address the findings of an independent GPT-5.6 Sol audit of v0.3.0 (four findings, all verified against the plugin source, 1.0.6).
+
+### Changed
+- The canonical inline-task dispatch is now the plugin's companion CLI - `task --background --fresh --prompt-file <file> --json` with the model/effort pins - instead of `/codex:rescue --background`: the slash command backgrounds the Claude-side subagent and strips `--background` before the runtime `task` call, so it never returns the `task-*` job ID the deadline/cancel mechanics enforce against, and it re-materializes the prompt as a Bash argv (~32 KB Windows ceiling) on its way to the runtime - a chunk legal under the ~50 KB budget could fail in dispatch. The job ID is captured from the `--json` payload (no parseable ID = failed dispatch, fall back to diff-reviewer); read-only is structural (no `--write` flag) rather than prompt-interpreted; and the companion dependency is a declared internal-interface coupling, re-verified on plugin updates (skill §6, CLAUDE.md, both READMEs, example workflow, transport spec).
+
+### Fixed
+- The temp file carrying the audit prompt - and therefore the diff - is deleted the moment its dispatch returns, success or error, instead of never: the queued job persists its own copy of the prompt (skill §6 steps 3/5).
+- The README's first-run and manual-review steps no longer point native-Windows users at typing `/codex:review` directly, which bypassed the `auto` transport and reproduced the very hang the transport exists to avoid; they route the review through the protocol and link the Windows section (both READMEs).
 
 ## [0.3.0] - 2026-07-09
 
