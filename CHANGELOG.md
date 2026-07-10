@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.3.0] - 2026-07-09
+
 ### Added
 - Review transport knob in `CLAUDE.md`'s review gate (`auto | direct | inline-task`, default `auto`) and the inline-task procedure as delegation-protocol skill §6: diff computed locally (`git merge-base` scope, so committed and uncommitted work both ship; mixed-authorship branches scoped to the Claude-authored paths) and embedded in a read-only, background `/codex:rescue` prompt (effort pinned per invocation: `high`, `xhigh` on risk paths; never `--write`, never `minimal` - Sol rejects it), a no-commands/no-files contract with a collision-safe delimiter, file-boundary splitting above ~50 KB (54 KB verified; single oversized files route to diff-reviewer), a per-chunk deadline enforced against recorded job IDs with `/codex:cancel` cleanup so no review job is left hanging, and mandatory Claude-side validation of every finding against the full repository (confirmed / discarded / needs design decision; the reviewer's original findings and verdict are preserved verbatim, disputed findings and blockers are cleared only by the human, fixes are never auto-applied). Spec: `docs/specs/review-transport.md`.
 
@@ -66,7 +70,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.3.0
 [0.2.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.2.1
 [0.2.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.2.0
 [0.1.4]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.1.4
