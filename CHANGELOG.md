@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.4.0] - 2026-08-09
+
 ### Changed
 - Review effort ladder replaced by per-path ceilings: reviews run at the highest effort their invocation path exposes - `max` via `direct` (the raw CLI pins it per invocation: `codex review --commit <sha> -c model_reasoning_effort="max"` - a single-commit form; branch-level direct reviews pin `max` in the resolved config and use the flagless plugin command, which inherits it), `xhigh` as the pinnable ceiling via `inline-task` (the companion's `--effort` flag rejects `max`; an omitted flag inherits the resolved config, which may sit higher). `max` stops being an "exceptional, human-authorized escalation": it is the top of the API's effort enum (`none|minimal|low|medium|high|xhigh|max`), the risk-path adversarial pass runs at the same maximum because no higher rung exists, and the old "raise to `xhigh`, then set it back" lifecycle is deleted (CLAUDE.md, skill §2/§5/§6, both READMEs, `llms.txt`). Measured 2026-08-08/09, plugin 1.0.6 / Codex CLI 0.144.x.
 - Inline-task chunk deadline raised from 15 to 25 minutes, PROVISIONAL, with exactly one same-length extension for a job still reported `running`: a measured `max` pass took 16m 27s on a 16 KB diff and would have been cancelled at the old default, discarding the blocker it found; the two `max` timings on record differ 3.7x at similar sizes, so the bound gets re-measured near the ~50 KB chunk ceiling (skill §6 step 5).
@@ -94,7 +98,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.4.0
 [0.3.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.3.1
 [0.3.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.3.0
 [0.2.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.2.1
