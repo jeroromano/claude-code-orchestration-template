@@ -5,7 +5,7 @@
 <!-- NOTA DE MANTENIMIENTO (diseño deliberado - no "corregir"): el stamp de fecha es provenance, no rot.
 Registra cuándo se sincronizó esta traducción para que el lector pueda juzgar su frescura.
 Se actualiza al re-sincronizar; no se elimina. Sin el stamp, el drift se vuelve indetectable. -->
-> Traducción de [README.md](README.md) (canónico, en inglés), sincronizada a julio de 2026. Ante cualquier discrepancia, prevalece la versión en inglés.
+> Traducción de [README.md](README.md) (canónico, en inglés), sincronizada a agosto de 2026. Ante cualquier discrepancia, prevalece la versión en inglés.
 
 Ruteo de modelos, compuertas de gasto y compuertas de revisión para [Claude Code](https://code.claude.com) — con degradación limpia cuando faltan las piezas opcionales.
 
@@ -102,7 +102,7 @@ Un ejemplo completo trabajado — spec de tarea, decisión de ruteo, hallazgos d
 Requisitos: Claude Code, Node.js 18.18+ (el plugin puede instalar el Codex CLI vía npm), y una cuenta de ChatGPT en cualquier plan (incluso Free) o una API key de OpenAI. El uso descuenta de **tus límites de Codex, no de los de Claude** — esa separación es el arbitraje.
 
 <!-- La fecha/versión de abajo es provenance deliberado (última verificación), no rot. Actualizar al re-verificar; no eliminar. -->
-**Acoplamiento de interfaz, declarado:** la tabla de ruteo de este template referencia `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`, `/codex:status` y `/codex:result`, probados contra [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) a julio de 2026 (Codex CLI 0.144.x). Si el plugin renombra comandos, actualizá la tabla de ruteo del skill. El transporte de review inline-task además maneja directamente el CLI companion *interno* del plugin (`scripts/codex-companion.mjs task --background --prompt-file --json`) — el único camino que despacha una revisión con un job ID capturable y cancelable; no es un comando público, así que re-verificá esos flags y el payload JSON en cada actualización del plugin (verificado contra el plugin 1.0.6).
+**Acoplamiento de interfaz, declarado:** la tabla de ruteo de este template referencia `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`, `/codex:status` y `/codex:result`, probados contra [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) a julio de 2026 (Codex CLI 0.144.x). Si el plugin renombra comandos, actualizá la tabla de ruteo del skill. El transporte de review inline-task además maneja directamente el CLI companion *interno* del plugin (`scripts/codex-companion.mjs task --background --prompt-file --json`) — el único camino que despacha una revisión con un job ID capturable y cancelable; no es un comando público, así que re-verificá esos flags y el payload JSON en cada actualización del plugin (verificado contra el plugin 1.0.6; re-verificado en agosto de 2026 — el flag `--effort` del companion topa en `xhigh` y rechaza `max`, así que el camino directo es el único que lo expone).
 
 Sin el plugin nada se rompe: el protocolo rutea las revisiones al `diff-reviewer` local — por instrucción en la tabla de ruteo, no por intercepción — y su veredicto va a señalar honestamente que la revisión misma-familia es la garantía más débil.
 
@@ -112,7 +112,7 @@ Sin el plugin nada se rompe: el protocolo rutea las revisiones al `diff-reviewer
 
 Con el plugin instalado, este template rutea el trabajo de Codex a **GPT-5.6 Sol** en dos roles, en este orden:
 
-- **Auditor independiente (primario).** Sol revisa diffs escritos por Claude. Effort: `high` para revisiones normales, `xhigh` para revisiones de risk paths, y `max` sólo como escalación excepcional autorizada explícitamente por un humano — `max` existe en Codex, pero el camino actual del plugin no lo expone por invocación (`/codex:rescue --effort` y los valores documentados de `.codex/config.toml` llegan hasta `xhigh`).
+- **Auditor independiente (primario).** Sol revisa diffs escritos por Claude. Effort: el máximo que expone cada camino de invocación — `max` (el tope real del enum, y el TOML lo acepta) en el camino directo, donde el CLI crudo además lo pinea por invocación (`codex review --commit <sha> -c model_reasoning_effort="max"`, verificado en agosto de 2026); `xhigh` como techo pineable en el camino inline-task, cuyo flag `--effort` del companion rechaza `max`, mientras que omitir el flag hereda tu config resuelta, que puede estar más arriba. La pasada adversarial de risk path corre a ese mismo máximo: no queda escalón más alto al cual escalar. Un pin es una selección exacta, no una subida — puede bajar una máquina configurada en `max` — así que pineá sólo para subir una config baja, y verificá lo que realmente corrió vía el rollout de sesión (skill §5–§6).
 - **Implementador atado a spec (secundario).** Sol escribe únicamente implementaciones de una spec ya aprobada — nunca arquitectura, planes ni las specs mismas; eso queda en Claude (Fable si se escaló). Subí a `--effort high` sólo para bugs difíciles o trabajo multi-módulo:
 
 ```
@@ -123,14 +123,14 @@ GPT-5.6 Sol es un preview de acceso limitado: tener cuenta de Codex no garantiza
 
 El revisor se elige siempre por autoría — ningún modelo aprueba su propio diff: escrito por Claude -> revisión Codex; escrito por Codex -> el `diff-reviewer` local o un humano; autoría mixta -> cada porción la revisa un agente que no la escribió.
 
-`/codex:review` no acepta flags de modelo ni effort por invocación — hereda la configuración de tu Codex CLI. Este template no incluye ningún `.codex/config.toml`, así que de fábrica las revisiones corren en el modelo default de tu CLI; corren en Sol a `high` recién cuando agregás vos el pin de abajo (ojo: según la documentación de Codex, un config a nivel de proyecto sólo se carga en repos que el CLI marca como confiables):
+`/codex:review` no acepta flags de modelo ni effort por invocación — hereda tu configuración de Codex RESUELTA: el `.codex/config.toml` local del repo cuando ese archivo existe (y, según la documentación de Codex, sólo en repos que el CLI marca como confiables); si no, tu `~/.codex/config.toml` global. Este template no incluye ningún `.codex/config.toml`, así que de fábrica las revisiones corren en lo que resuelva tu config global o el default del CLI; corren en Sol al techo recién cuando pineás vos:
 
 ```toml
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "max"
 ```
 
-Subí `model_reasoning_effort` a `"xhigh"` para una revisión de risk path, y después volvelo atrás.
+No hay lifecycle por revisión que recordar: con el techo pineado, la pasada de risk path corre al mismo máximo que cualquier otra revisión. Una advertencia — el CLI no valida este valor localmente: un typo atraviesa el parseo, se imprime en el header de la corrida y muere a mitad de la revisión en la API con HTTP 400 (el rechazo lista el enum real: `none|minimal|low|medium|high|xhigh|max`).
 
 **No uses Ultra.** Codex Ultra es orquestación multiagente; este template ya es la capa de orquestación, así que Ultra la duplicaría y multiplicaría el gasto en ambos pools de cuota.
 
@@ -142,9 +142,9 @@ Por eso el template hace configurable el transporte de review — un bullet en e
 
 - `auto` — `direct` en todas partes salvo Windows nativo, donde resuelve a `inline-task`.
 - `direct` — los dos comandos de arriba, exactamente como antes.
-- `inline-task` — Claude computa el diff localmente, escribe el prompt de auditoría — con un contrato explícito de "analizá solo este diff, no ejecutes nada, no pidas nada" — a un archivo temporal, y lo despacha read-only en background sobre el runtime de tasks del companion del plugin (`task --background --prompt-file --json`; `--effort high`, `xhigh` para la pasada de risk path; nunca `--write`, nunca `minimal` — Sol lo rechaza). Captura el job ID `task-*` del despacho y borra el temporal de inmediato, divide diffs de más de ~50 KB por límites de archivo, aplica un deadline con cancelación contra el ID capturado para que ningún job de review quede colgado, y después valida cada finding contra el repositorio completo (confirmado / descartado / necesita decisión de diseño — preservando verbatim los findings y el veredicto original del reviewer) antes de reportar. El despacho deliberadamente *no* es `/codex:rescue`: su `--background` manda a background al agente del lado de Claude y no devuelve ningún job ID contra el cual cancelar, y el prompt vuelve a entrar en un techo de argv de ~32 KB de Windows camino al runtime. Mecánica completa: skill delegation-protocol §6.
+- `inline-task` — Claude computa el diff localmente, escribe el prompt de auditoría — con un contrato explícito de "analizá solo este diff, no ejecutes nada, no pidas nada" — a un archivo temporal, y lo despacha read-only en background sobre el runtime de tasks del companion del plugin (`task --background --prompt-file --json`; effort heredado de tu config resuelta por defecto — un pin sólo sube una config baja hasta un piso, con el techo del flag del companion en `xhigh`; nunca `--write`, nunca `minimal` — Sol lo rechaza). Captura el job ID `task-*` del despacho y borra el temporal de inmediato, divide diffs de más de ~50 KB por límites de archivo, aplica un deadline con cancelación contra el ID capturado para que ningún job de review quede colgado, y después valida cada finding contra el repositorio completo (confirmado / descartado / necesita decisión de diseño — preservando verbatim los findings y el veredicto original del reviewer) antes de reportar. El despacho deliberadamente *no* es `/codex:rescue`: su `--background` manda a background al agente del lado de Claude y no devuelve ningún job ID contra el cual cancelar, y el prompt vuelve a entrar en un techo de argv de ~32 KB de Windows camino al runtime. Mecánica completa: skill delegation-protocol §6.
 
-Quién revisa no cambia nunca — el transporte solo cambia cómo se entrega una revisión destinada a Codex. Las plataformas no-Windows conservan el comportamiento de hoy exactamente. Cuando una actualización del plugin/CLI arregle el sandbox (una revisión de prueba sobre un diff trivial termina dentro de su deadline), poné la opción en `direct`.
+Quién revisa no cambia nunca — el transporte solo cambia cómo se entrega una revisión destinada a Codex. Las plataformas no-Windows conservan el comportamiento de hoy exactamente. Existe un fix por-máquina verificado (agosto de 2026): instalá PowerShell 7 fuera del path de la Store (WindowsApps) — el shim de la Store rompe el spawn de procesos dentro del sandbox — y reiniciá el app-server del plugin, que cachea el PATH con el que se lanzó. Cuando una revisión de prueba sobre un diff trivial termine dentro de su deadline (tras el fix, o tras una actualización del plugin/CLI), poné la opción en `direct`: es el único camino que expone `max`, y el reviewer entonces verifica sus hipótesis contra el repositorio real en vez de juzgar un diff pegado.
 
 ## Nota de seguridad
 

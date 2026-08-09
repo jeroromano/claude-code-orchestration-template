@@ -100,7 +100,7 @@ Requirements: Claude Code, Node.js 18.18+ (the plugin can install the Codex CLI 
 not rot. Rot = a statement time makes FALSE (prices, quotas, regimes): those are banned from this repo.
 Provenance = a statement time makes OLD (when compatibility was last verified): its whole function is to
 let the reader judge staleness. Update the stamp when you re-verify; never remove it. -->
-**Interface coupling, declared:** this template's routing table references `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`, `/codex:status` and `/codex:result`, tested against [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) as of July 2026 (Codex CLI 0.144.x). If the plugin renames commands, update the skill's routing table. The inline-task review transport additionally drives the plugin's *internal* companion CLI (`scripts/codex-companion.mjs task --background --prompt-file --json`) - the only path that dispatches a review with a capturable, cancellable job ID; it is not a public command, so re-verify those flags and the JSON payload on every plugin update (verified against plugin 1.0.6).
+**Interface coupling, declared:** this template's routing table references `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`, `/codex:status` and `/codex:result`, tested against [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) as of July 2026 (Codex CLI 0.144.x). If the plugin renames commands, update the skill's routing table. The inline-task review transport additionally drives the plugin's *internal* companion CLI (`scripts/codex-companion.mjs task --background --prompt-file --json`) - the only path that dispatches a review with a capturable, cancellable job ID; it is not a public command, so re-verify those flags and the JSON payload on every plugin update (verified against plugin 1.0.6; re-verified August 2026 - the companion's `--effort` flag caps at `xhigh` and rejects `max`, so the direct path is the only one exposing it).
 
 Without the plugin nothing breaks: the protocol routes reviews to the local `diff-reviewer` instead - by instruction in the routing table, not by interception - and its verdict will honestly note that same-family review is the weaker guarantee.
 
@@ -110,7 +110,7 @@ Without the plugin nothing breaks: the protocol routes reviews to the local `dif
 
 With the plugin installed, this template routes Codex work to **GPT-5.6 Sol** in two roles, in this order:
 
-- **Independent auditor (primary).** Sol reviews Claude-authored diffs. Effort: `high` for normal reviews, `xhigh` for risk-path reviews, and `max` only as an exceptional, explicitly human-authorized escalation - `max` exists in Codex, but the current plugin path does not expose it per invocation (`/codex:rescue --effort` and the documented `.codex/config.toml` values stop at `xhigh`).
+- **Independent auditor (primary).** Sol reviews Claude-authored diffs. Effort: the highest each invocation path exposes - `max` (the real top of the enum, and accepted by the TOML) on the direct path, where the raw CLI also pins it per invocation (`codex review --commit <sha> -c model_reasoning_effort="max"`, verified August 2026); `xhigh` as the pinnable ceiling on the inline-task path, whose companion `--effort` flag rejects `max` while an omitted flag inherits your resolved config, which may sit higher. The risk-path adversarial pass runs at that same maximum: there is no higher rung to escalate to. A pin is an exact selection, not a raise - it can lower a `max`-configured machine - so pin only to raise a low config, and verify what actually ran via the session rollout (skill §5-§6).
 - **Spec-bound implementer (secondary).** Sol writes only implementations of an already-approved spec - never architecture, plans, or the specs themselves; those stay with Claude (Fable when escalated). Raise to `--effort high` only for hard bugs or multi-module work:
 
 ```
@@ -121,14 +121,14 @@ GPT-5.6 Sol is a limited-access preview: a Codex account does not guarantee it. 
 
 The reviewer is always chosen by authorship - no model approves its own diff: Claude-authored -> Codex review; Codex-authored -> the local `diff-reviewer` or a human; mixed -> each portion reviewed by an agent that did not write it.
 
-`/codex:review` accepts no per-invocation model or effort flags - it inherits your Codex CLI configuration. This template ships no `.codex/config.toml`, so out of the box reviews run on your CLI's default model; they run on Sol at `high` only once you add the pin below yourself (note: per the Codex docs, a project-level config loads only in repos the CLI trusts):
+`/codex:review` accepts no per-invocation model or effort flags - it inherits your RESOLVED Codex configuration: the repo-local `.codex/config.toml` when that file exists (and, per the Codex docs, only in repos the CLI trusts), otherwise your global `~/.codex/config.toml`. This template ships no `.codex/config.toml`, so out of the box reviews run on whatever your global config or CLI default resolves; they run on Sol at the ceiling only once you pin it yourself:
 
 ```toml
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "max"
 ```
 
-Raise `model_reasoning_effort` to `"xhigh"` for a risk-path review, then set it back.
+There is no per-review lifecycle to remember: with the ceiling pinned, the risk-path pass runs at the same maximum as every other review. One warning - the CLI does not validate this value locally: a typo passes parsing, prints in the run header, and dies mid-review at the API with HTTP 400 (the rejection lists the real enum: `none|minimal|low|medium|high|xhigh|max`).
 
 **Do not use Ultra.** Codex Ultra is multi-agent orchestration; this template is already the orchestration layer, so Ultra would duplicate it and multiply spend on both quota pools.
 
@@ -140,9 +140,9 @@ The template therefore makes the review transport configurable - one bullet in `
 
 - `auto` - `direct` everywhere except native Windows, where it resolves to `inline-task`.
 - `direct` - the two commands above, exactly as before.
-- `inline-task` - Claude computes the diff locally, writes the audit prompt - with an explicit "analyze only this diff, run nothing, request nothing" contract - to a temp file, and dispatches it read-only in the background on the plugin's companion task runtime (`task --background --prompt-file --json`; `--effort high`, `xhigh` for the risk-path pass; never `--write`, never `minimal` - Sol rejects it). It captures the `task-*` job ID from the dispatch and deletes the temp file immediately, splits diffs over ~50 KB at file boundaries, applies a deadline with cancellation against the captured ID so no review job is left hanging, and then validates every finding against the full repository (confirmed / discarded / needs design decision - preserving the reviewer's original findings and verdict verbatim) before reporting. The dispatch is deliberately *not* `/codex:rescue`: its `--background` backgrounds the Claude-side agent and returns no job ID to cancel against, and the prompt re-enters a ~32 KB Windows argv ceiling on its way to the runtime. Full mechanics: delegation-protocol skill §6.
+- `inline-task` - Claude computes the diff locally, writes the audit prompt - with an explicit "analyze only this diff, run nothing, request nothing" contract - to a temp file, and dispatches it read-only in the background on the plugin's companion task runtime (`task --background --prompt-file --json`; effort inherited from your resolved config by default - a pin only raises a low config to a floor, capped at the companion's `xhigh` flag ceiling; never `--write`, never `minimal` - Sol rejects it). It captures the `task-*` job ID from the dispatch and deletes the temp file immediately, splits diffs over ~50 KB at file boundaries, applies a deadline with cancellation against the captured ID so no review job is left hanging, and then validates every finding against the full repository (confirmed / discarded / needs design decision - preserving the reviewer's original findings and verdict verbatim) before reporting. The dispatch is deliberately *not* `/codex:rescue`: its `--background` backgrounds the Claude-side agent and returns no job ID to cancel against, and the prompt re-enters a ~32 KB Windows argv ceiling on its way to the runtime. Full mechanics: delegation-protocol skill §6.
 
-Who reviews never changes - the transport only changes how a Codex-bound review is delivered. Non-Windows platforms keep today's behavior exactly. When a plugin/CLI update fixes the sandbox (a probe review on a trivial diff completes within its deadline), set the knob to `direct`.
+Who reviews never changes - the transport only changes how a Codex-bound review is delivered. Non-Windows platforms keep today's behavior exactly. A verified per-machine fix exists (August 2026): install PowerShell 7 outside the WindowsApps store path - the Store shim breaks process spawning inside the sandbox - and restart the plugin's app-server, which caches the PATH it was launched with. When a probe review on a trivial diff completes within its deadline (after the fix, or after a plugin/CLI update), set the knob to `direct`: it is the only path exposing `max`, and the reviewer then verifies its hypotheses against the real repository instead of judging a pasted diff.
 
 ## Security note
 

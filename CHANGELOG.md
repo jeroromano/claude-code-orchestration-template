@@ -4,7 +4,17 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- Review effort ladder replaced by per-path ceilings: reviews run at the highest effort their invocation path exposes - `max` via `direct` (the raw CLI pins it per invocation: `codex review --commit <sha> -c model_reasoning_effort="max"`; the flagless plugin command inherits the resolved config), `xhigh` as the pinnable ceiling via `inline-task` (the companion's `--effort` flag rejects `max`; an omitted flag inherits the resolved config, which may sit higher). `max` stops being an "exceptional, human-authorized escalation": it is the top of the API's effort enum (`none|minimal|low|medium|high|xhigh|max`), the risk-path adversarial pass runs at the same maximum because no higher rung exists, and the old "raise to `xhigh`, then set it back" lifecycle is deleted (CLAUDE.md, skill §2/§5/§6, both READMEs, `llms.txt`). Measured 2026-08-08/09, plugin 1.0.6 / Codex CLI 0.144.x.
+- Inline-task chunk deadline raised from 15 to 25 minutes, PROVISIONAL, with exactly one same-length extension for a job still reported `running`: a measured `max` pass took 16m 27s on a 16 KB diff and would have been cancelled at the old default, discarding the blocker it found; the two `max` timings on record differ 3.7x at similar sizes, so the bound gets re-measured near the ~50 KB chunk ceiling (skill §6 step 5).
+- The *configured* provenance tier now names the config file that actually resolves: the repo-local `.codex/config.toml` governs only when it exists (and the repo is trusted); otherwise the global `~/.codex/config.toml` does - "CLI default (unknown)" only when neither sets a value (skill §4, both READMEs).
+
+### Added
+- Fail-closed effort compliance in the review gate: preflight the resolved config before dispatching (a pin is an exact selection and can LOWER effort - pin only to raise a low config to a floor), then verify the effort that actually ran from the session rollout (`~/.codex/sessions/<Y>/<M>/<D>/rollout-*-<session-id>.jsonl`, `thread_settings_applied`: real effort, model, and the permission profile evidencing the read-only sandbox), which promotes Codex provenance from *requested*/*configured* to *verified*. A rollout below the ordered effort - or one that cannot be read - invalidates the verdict: its findings are not classified and the review is re-dispatched (skill §4/§5/§6, CLAUDE.md).
+- Typo warning on `model_reasoning_effort`: the Codex CLI does not validate the value locally - an invalid one passes parsing, prints in the run header, and dies mid-review at the API with HTTP 400 (skill §5, both READMEs).
+- Top-tier design-authority rule in CLAUDE.md's model routing: a design or audit produced by the escalated top tier is authoritative for the cheaper model implementing it - implemented to the letter, deviations flagged to the human BEFORE deviating; overridden only by a review-caught concrete error (repro or file:line) or an explicit human decision.
+- The native-Windows sandbox breakage now documents its verified per-machine fix (2026-08-08): PowerShell 7 installed outside the WindowsApps store path, plus a restart of the plugin's app-server, which caches the old PATH. After a probe review passes, `direct` becomes available - the only path exposing `max`, with a reviewer that verifies hypotheses against the real repository (CLAUDE.md, skill §6, both READMEs, `llms.txt`).
+- `docs/specs/review-effort-ceilings.md`: the approved spec for this change.
 
 ## [0.3.1] - 2026-07-09
 
