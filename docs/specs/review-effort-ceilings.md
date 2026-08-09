@@ -5,6 +5,28 @@ session - reviews may now run at `max` on the direct (sandboxed) path and up to 
 inline-task path - plus measurements taken 2026-08-08/09 (plugin 1.0.6, Codex CLI 0.144.x, Windows 11). Supersedes the effort ladder of `gpt-5-6-sol-routing.md` (decision 2)
 and the v0.2.1 attribution of the `max` limitation to "the documented TOML values".
 
+Revised 2026-08-09, same day, after the independent audit of the released delta: GPT-5.6 Sol in two
+inline-task chunks, both at rollout-verified `max` (inherited from the resolved config - the review
+demonstrated decision 1's inheritance rule with its own run), plus a diff-reviewer cross-chunk pass;
+1 blocker + 6 majors + 1 minor + 2 concerns + 1 nit (the nit - a conservative size estimate in the
+expected-diff-shape table below - needed no fix), all classified. Fixes folded in: the context paragraph
+recording the session premise no longer states a billing regime, and the validation criterion is
+scoped to lines the delta adds (the blocker; pre-existing pool-mechanism wording classified out of
+scope); "the only path exposing `max`" corrected to "the only path that can PIN `max` per invocation"
+in decisions 1/5 and every artifact (inline-task demonstrably reaches `max` by inheritance); the
+raw-CLI `--commit` form is labeled single-commit and excluded as a substitute for branch-level review
+across its full five-file footprint (the cross-chunk pass established the footprint was wider than
+either chunk saw); preflight defines unset/indeterminate config as BELOW the target (decision 2);
+rollout verification gains per-path session-id correlation - an uncorrelatable direct review is
+unverifiable, hence invalid - and a non-read-only permission profile now also invalidates (decision
+3); decision 6's authority is narrowed to APPROVED designs/specs, keeping audit findings inside the
+finding-validation flow; transport wording in the READMEs is scoped to delivery selection; and the
+CHANGELOG citation for the configured-tier fix no longer implies the READMEs use provenance-tier
+vocabulary. The audit run itself also discharged this spec's first open item (the voluntary
+independent pass doubling as the live companion-dispatch probe): dispatch returned capturable
+`task-*` IDs, both chunks (47.6 KB and 30.2 KB prompts) completed in 8m 56s and 5m 50s - inside the
+25-minute provisional deadline - and both rollouts were read and proved `max` on a read-only profile.
+
 ## Context
 
 The template's effort ladder said: Sol reviews at `high`, `xhigh` on risk paths, `max` only as an
@@ -52,11 +74,11 @@ does not)". Three of those clauses have now been measured false or obsolete:
   which removes the context-starved false positives that inline-task's validation pass exists to
   classify.
 
-Separately, the human confirmed Fable's plan inclusion is now definitive. Per this repo's rot rule,
-billing-regime statements stay banned from the artifacts (a regime is exactly what time makes false),
-so nothing gains a "Fable is included" claim; the consequence is structural instead: escalation to the
-top tier is a stable, first-class rung, so the template now states how a top-tier design binds the
-cheaper models that implement it.
+Separately, the human directed that escalation to the top tier be treated as a stable, first-class
+rung of the routing. Per this repo's rot rule, billing-regime statements (plan inclusion, rates,
+quotas) stay banned from the artifacts - a regime is exactly what time makes false - so nothing gains
+a regime claim; the consequence is structural instead: the template now states how a top-tier design
+binds the cheaper models that implement it.
 
 ## Decisions
 
@@ -73,14 +95,19 @@ cheaper models that implement it.
 2. **Preflight before dispatch.** Read the resolved Codex config (repo-local `.codex/config.toml`
    only when it exists and the repo is trusted; otherwise the global `~/.codex/config.toml`) before
    dispatching a review. At-or-above target: omit `--effort`. Below target: pin the path's ceiling as
-   a floor. Never report "CLI default (unknown)" while a global config exists - name the file that
-   actually resolved and its values.
+   a floor. An unset or indeterminate value counts as below - pin; it is never "satisfied by unknown".
+   Never report "CLI default (unknown)" while a global config exists - name the file that actually
+   resolved and its values.
 3. **Verify the rollout for any verdict you act on.** Read the session rollout
-   (`thread_settings_applied`) and report model/effort as *verified*, naming the session id. A rollout
-   showing an effort below what the policy ordered, OR a rollout you could not read, makes the verdict
-   INVALID: say so, do not classify its findings, re-dispatch. "We could not check" and "it was fine"
-   must not look the same. The *requested*/*configured* tiers survive only for reports nobody acts on
-   (status notes, aborted runs).
+   (`thread_settings_applied`) and report model/effort as *verified*, naming the session id. Correlate
+   the session id from the invocation's own result (companion jobs name it in the job result -
+   verified 2026-08-09); a direct review whose session id cannot be correlated is unverifiable under
+   the same rule - never resolved by picking the newest rollout, which is unsafe under concurrent
+   sessions. A rollout showing an effort below what the policy ordered, OR a permission profile that
+   is not read-only, OR a rollout you could not read, makes the verdict INVALID: say so, do not
+   classify its findings, re-dispatch. "We could not check" and "it was fine" must not look the same.
+   The *requested*/*configured* tiers survive only for reports nobody acts on (status notes, aborted
+   runs).
 4. **Deadline: 25 minutes per chunk, PROVISIONAL, one extension.** Raised from 15 because the only
    `max` timings on record (16m 27s, 4m 29s) straddle the old default. Provisional because both sit
    near 16 KB - a third of the ~50 KB chunk budget - and differ 3.7x between themselves, so size does
@@ -91,16 +118,20 @@ cheaper models that implement it.
 5. **Transport knob semantics unchanged; `direct` gains two reasons to exist.** `auto` still resolves
    to `inline-task` on native Windows (the breakage is the default state of a fresh machine; the fix
    is per-machine). The re-enable path is unchanged (probe review completes within deadline -> set
-   `direct`) but now documents the verified fix and what `direct` buys: the only path exposing `max`,
-   and a reviewer that verifies its own hypotheses against the repo before reporting them.
-6. **Top-tier design authority.** New model-routing rule in `CLAUDE.md`: a design or audit produced by
-   the escalated top tier is AUTHORITATIVE for the cheaper model that implements it - implemented to
-   the letter, each point a checklist item. Prohibited: substituting a specified check with "implicit
-   equivalence" reasoning, silently simplifying to an easier variant, or documenting the designed
-   variant while implementing another. If a point seems wrong or unnecessary, flag the deviation to
-   the human BEFORE deviating. Only overrides: an independent review catches a concrete error (repro
-   or file:line), or an explicit human decision. This is the existing "spec > code" hierarchy applied
-   across model tiers, and it is the template-shaped consequence of the top tier being a stable rung.
+   `direct`) but now documents the verified fix and what `direct` buys: the only path that can pin
+   `max` per invocation, and a reviewer that verifies its own hypotheses against the repo before
+   reporting them.
+6. **Top-tier design authority.** New model-routing rule in `CLAUDE.md`: an APPROVED design or spec
+   authored by the escalated top tier is AUTHORITATIVE for the cheaper model that implements it -
+   implemented to the letter, each point a checklist item. Prohibited: substituting a specified check
+   with "implicit equivalence" reasoning, silently simplifying to an easier variant, or documenting
+   the designed variant while implementing another. If a point seems wrong or unnecessary, flag the
+   deviation to the human BEFORE deviating. Only overrides: an independent review catches a concrete
+   error (repro or file:line), or an explicit human decision. Audit and review FINDINGS are not
+   specs: they remain inside the finding-validation flow (skill §6) and are never auto-applied -
+   authority binds implementation of approved designs, never the acceptance of unvalidated critiques.
+   This is the existing "spec > code" hierarchy applied across model tiers, and it is the
+   template-shaped consequence of the top tier being a stable rung.
 7. **No regime claims.** Nothing in the template asserts Fable's (or any model's) plan inclusion,
    rates or quotas. The premium-reasoner gate, runtime disclosure and `/usage` verification stand
    unchanged.
@@ -157,7 +188,8 @@ adopt these changes separately).
 - `git grep -n "xhigh"` / `git grep -n '"max"'` consistent: no surviving claim that the plugin path
   stops at `xhigh` unqualified, no surviving "raise then set back" lifecycle, no per-invocation
   human-authorization requirement for `max`.
-- No regime claim (plan inclusion, rates) anywhere in the diff.
+- No regime claim (plan inclusion, rates) in any line this delta adds; pre-existing pool-mechanism
+  wording in unchanged lines is out of this delta's scope (classified 2026-08-09).
 - EN/ES parity on every touched section; `.codex/` absent from the tree.
 
 ## Expected diff shape
