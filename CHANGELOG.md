@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.5.1] - 2026-09-29
+
 Changes below address the independent review of v0.5.0: GPT-6.1 Sol in three inline-task chunks (rollout-verified `xhigh`, read-only, zero tool and sub-agent calls, Codex CLI 0.159.1 - the run doubled as the live probe of plugin 1.0.6 on the new CLI, and passed) plus a diff-reviewer cross-chunk pass; 3 majors, 7 minors, no blockers.
 
 ### Changed
@@ -123,7 +127,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.1
 [0.5.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.0
 [0.4.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.4.0
 [0.3.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.3.1
