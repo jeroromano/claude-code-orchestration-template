@@ -40,7 +40,7 @@ The first row of the routing table in [SKILL.md](../.claude/skills/delegation-pr
 
 For contrast, the same task would route differently under different conditions:
 
-- **Codex rescue** - if this were a broader, already-approved implementation spec (not just tests) and the Codex plugin were installed, it would run there in the background instead: `/codex:rescue --fresh --background --model gpt-6.1-sol --effort medium <approved spec>` (raise to `--effort high` only for hard bugs or multi-module work). If the CLI rejects Sol - it needs Codex CLI 0.159.0 or newer plus account access - rerun without `--model` or fall back to fast-worker, per the skill's cost guards.
+- **Codex rescue** - if this were a broader, already-approved implementation spec (not just tests) and the Codex plugin were installed, it would run there in the background instead: `/codex:rescue --fresh --background --model gpt-6.1-sol --effort medium <approved spec>` (raise to `--effort high` only for hard bugs or multi-module work). If the CLI rejects Sol - it needs Codex CLI 0.159.0 or newer plus account access - fall back to fast-worker, per the skill's cost guards; never rerun without `--model`, whose CLI default may resolve to GPT-6 Astra, which never implements.
 - **deep-reasoner** - if the ask were one hard scoped question with no writing (for example, "why does `slugify()` mis-handle combining diacritics" as investigation, not tests), it would go to deep-reasoner.
 - **premium-reasoner** - only if the human authorizes premium spend and the orchestrator adds `PREMIUM-APPROVED` to the prompt for that specific invocation; the orchestrator never adds that token on its own initiative.
 

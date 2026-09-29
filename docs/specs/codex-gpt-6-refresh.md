@@ -7,6 +7,19 @@ rescue pin and the recommended TOML) and two facts of `review-effort-ceilings.md
 the effort enum" and "the rollout carries a `thread_settings_applied` event". Every other decision of
 those specs stands.
 
+Revised 2026-09-29, same day, after the independent review of the released v0.5.0 (GPT-6.1 Sol in
+three inline-task chunks - rollout-verified `xhigh`, read-only, zero tool and sub-agent calls, on
+Codex CLI 0.159.1 - plus a diff-reviewer cross-chunk pass): 3 majors, 7 minors, no blockers, all
+classified against the repository. Human decisions taken on the findings: when GPT-6.1 Sol is
+unavailable, work falls back to the LOCAL agents - never to a rerun without `--model`, whose CLI
+default is whatever the resolved config names and may be Astra (decision 4 rewritten); Astra reviews
+risk paths and never implements (interpretation confirmed, now stated in CLAUDE.md and the skill);
+writing effort stays `medium`/`high` (interpretation confirmed). Also folded in: the pin rule gains
+its `ultra` exception everywhere it is stated; the `thread_settings_applied` claim is stated per
+measured version instead of as a version cutoff; the price comparison below is removed; the Astra
+effort claims trace to sources; the README scopes config inheritance to the direct commands. The
+review itself doubled as this spec's first open item (the live probe on CLI 0.159.x), which passed.
+
 ## Context
 
 The human's decision: GPT-6.1 Sol becomes the default Codex model; GPT-6 Astra is reserved for the
@@ -30,7 +43,9 @@ version stamp so a reader can judge staleness):
   `gpt-6-astra` ("Frontier intelligence for the most demanding work"), `gpt-6-sol` ("Previous
   generation workhorse model"), `gpt-6-luna`, and the GPT-5.6 family ("Older generation"). OpenAI's
   model docs list `gpt-6.1-sol` with efforts `low|medium|high|xhigh|max` (no `none`/`minimal`) and
-  position it near Astra at a fraction of Astra's price.
+  position it near Astra in capability; OpenAI's GPT-6 guide states that GPT-6 Astra and GPT-6.1 Sol
+  do not support `none` (it is silent on Astra and `minimal`). The catalog lists `xhigh` and `max` for
+  Astra, and Astra threads ran at both on this machine (rollout census below).
 - **`ultra` is a new effort value above `max`, and it IS Codex Ultra.** The catalog advertises
   `low|medium|high|xhigh|max|ultra` for the GPT-6 and GPT-5.6 Sol models; `ultra` is described as
   "Maximum reasoning with automatic task delegation". Rollout census (one machine, CLI 0.144.5-0.157.0):
@@ -85,7 +100,12 @@ version stamp so a reader can judge staleness):
 4. **Degradations, disclosed:** Astra unavailable on the account -> run the risk-path pass on Sol 6.1
    at the same ceiling and state "Astra unavailable - degraded to GPT-6.1 Sol" in the report (the human
    may still block the merge on it). `gpt-6.1-sol` rejected (CLI older than 0.159.0, or no account
-   access) -> the existing rule: rerun without `--model`, or route writing to fast-worker; say which.
+   access) -> the LOCAL fallback: a rescue goes to fast-worker, a standard review to diff-reviewer, and a
+   risk-path pass already degraded from Astra goes to diff-reviewer with the risk-path focus text; the
+   report says which, and names a CLI below 0.159.0 as the cause when it is. Never rerun without
+   `--model`: the CLI default is whatever the resolved config names - Astra on a machine configured for
+   it - so that rerun could make Astra implement, or produce a review verification must reject
+   (revised after the v0.5.0 review; the original text kept the v0.2.1 "rerun without `--model`" rule).
    The "limited-access preview" wording for Sol is retired: the gate is now the CLI floor plus account
    access.
 5. **`ultra` is excluded as Codex Ultra.** The no-Ultra rule names it explicitly. Consequences:
@@ -98,7 +118,8 @@ version stamp so a reader can judge staleness):
      rollout, invalidates the verdict - same handling as a below-policy effort.
 6. **Rollout verification reads `turn_context`.** Every `turn_context` event in the session rollout
    must show the ordered model (or the declared degradation), the ordered effort and a read-only
-   profile; `thread_settings_applied` is named only as the event older CLIs (0.144.x) wrote. An
+   profile; `thread_settings_applied` is named only as the event older CLIs wrote (0.144.x, and a few
+   0.154.0 rollouts). An
    unreadable rollout still invalidates (fail closed). Rollout storage is re-checked on every CLI
    update (`migrate-rollouts` exists).
 7. **`review_model` in the recommended TOML.** The README snippet pins `model`, `review_model` and
@@ -111,7 +132,7 @@ version stamp so a reader can judge staleness):
 9. **Claude side: no instruction changes.** Aliases already resolve to Fable 5.1 / Opus 5.5 /
    Sonnet 5.5; only the worked example's sample provenance line is refreshed from a live probe.
 
-## Interpretations flagged to the human (defaults applied until overridden)
+## Interpretations flagged to the human (both confirmed 2026-09-29, after the v0.5.0 review)
 
 - "Sol 6.1 at xhigh or max" is read as the review ceilings - identical to the existing per-path policy.
   Writing effort stays `medium`/`high`.
@@ -145,9 +166,12 @@ Historical specs are not edited: this spec records what it supersedes.
 
 ## Open items
 
-- Live probe on CLI 0.159.x: the companion `task` dispatch with `--model gpt-6.1-sol` (job ID capture,
-  session id in the job result, `turn_context` fields) - doubles as the independent review of this
-  delta. Requires the global CLI update, which needs the running Codex processes closed first.
+- ~~Live probe on CLI 0.159.x~~ - DONE 2026-09-29 as the independent review of v0.5.0: companion
+  `task` dispatch with `--model gpt-6.1-sol --effort xhigh` returned capturable `task-*` IDs, each job
+  result named its thread (session) id, and the three rollouts showed `turn_context` with
+  `gpt-6.1-sol` / `xhigh` / read-only and no `thread_settings_applied` event; 3m 56s - 5m 40s on
+  31-53 KB prompts. Node now prints a DEP0190 deprecation warning on the companion's child-process
+  spawn - harmless, to watch on the next plugin release.
 - Whether `codex review --base <base>` accepts a custom prompt and `-c` pins together - if so, it is a
   branch-level direct review with per-invocation model/effort pins, retiring the single-commit caveat
   and the direct-path model gap of decision 3.

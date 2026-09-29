@@ -4,7 +4,18 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+Changes below address the independent review of v0.5.0: GPT-6.1 Sol in three inline-task chunks (rollout-verified `xhigh`, read-only, zero tool and sub-agent calls, Codex CLI 0.159.1 - the run doubled as the live probe of plugin 1.0.6 on the new CLI, and passed) plus a diff-reviewer cross-chunk pass; 3 majors, 7 minors, no blockers.
+
+### Changed
+- When GPT-6.1 Sol is unavailable, work falls back to the local agents - a rescue to fast-worker, a standard review to diff-reviewer - and never to a rerun without `--model`: the CLI default is whatever the resolved config names, which may be Astra, so that rerun could make Astra implement, and a standard review rerun that way always failed rollout verification, looping (skill §2/§5/§6, both READMEs, spec decision 4; CLAUDE.md and the example workflow state the rescue half). A risk-path pass already degraded from Astra, with Sol unavailable too, goes to diff-reviewer with the risk-path focus text (skill §5, spec decision 4).
+- Astra never implements - rescues pin `gpt-6.1-sol` on risk paths too - and its degradation to GPT-6.1 Sol is stated in CLAUDE.md as well (CLAUDE.md, skill §2, both READMEs). Both interpretations the v0.5.0 spec flagged (writing effort `medium`/`high`; Astra reviews only) are confirmed by the human.
+
+### Fixed
+- The pin rule now carries its `ultra` exception everywhere it is stated ("pin only to raise a low config or to replace a banned `ultra`"): CLAUDE.md and both READMEs told the reader to pin only upward while also requiring the downward pin that replaces an inherited `ultra` (CLAUDE.md, both READMEs).
+- The `thread_settings_applied` claim is stated per measured version - missing from every rollout measured from 0.153.4, 0.157.0 and 0.159.1 and from most from 0.154.0 - instead of the v0.5.0 entry's inaccurate "absent from 0.153 and later" cutoff; the rule (never require it, read `turn_context`) is unchanged (skill §6 step 5, spec decision 6).
+- The READMEs scope config inheritance to the direct commands (the inline-task transport pins the model per pass) and name the key that steers each pass: the adversarial pass runs on `model`, `review_model` steers only `/codex:review` (plugin 1.0.6 source), as the skill's preflight now also says (skill §5, both READMEs).
+- Astra's accepted-effort claim now traces to OpenAI's docs (Astra rejects `none`; GPT-6.1 Sol rejects `none` and `minimal`), and the spec drops a price comparison the no-prices rule bans (skill §5, spec).
+- The inline-task deadline note records that its timings are GPT-5.6 Sol's, adds the GPT-6.1 Sol `xhigh` timings from this review (3m 56s - 5m 40s on 31-53 KB prompts) and marks Astra unmeasured (skill §6 step 5).
 
 ## [0.5.0] - 2026-09-29
 
