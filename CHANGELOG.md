@@ -4,7 +4,17 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- Codex routing moves to the GPT-6 generation: GPT-6.1 Sol (`gpt-6.1-sol`) replaces GPT-5.6 Sol as the default model for reviews and spec-bound writing, at unchanged efforts (reviews at the per-path ceiling, writing at `medium`/`high`); GPT-6 Astra (`gpt-6-astra`), the costlier frontier tier, is reserved for the risk-path adversarial pass of Claude-authored diffs, degrading to GPT-6.1 Sol - disclosed in the report - when the account lacks it. Sol's "limited-access preview" caveat is replaced by its real gate: Codex CLI 0.159.0 or newer (older clients cannot see the model) plus account access (CLAUDE.md, skill §2/§5/§6, both READMEs, `llms.txt`, example workflow).
+- The model joins the fail-closed effort trio: preflight checks the resolved `model` - and `review_model`, which overrides it for the built-in reviewer - dispatch pins it per pass where the path allows (inline-task `--model`), and the rollout must show the ordered model or its declared degradation (skill §5/§6). The recommended TOML pins `review_model` alongside `model` (both READMEs).
+- Rollout verification reads the per-turn `turn_context` event (`model`, `effort`, `sandbox_policy`, `permission_profile`): the `thread_settings_applied` event the step named is absent from rollouts written by Codex CLI 0.153 and later (measured 2026-09-29), so the fail-closed check would have invalidated every verdict on a current CLI (skill §6 steps 5/7).
+
+### Added
+- The no-Ultra rule names its concrete key: the `ultra` reasoning effort, listed above `max` in the Codex catalog as "Maximum reasoning with automatic task delegation" - rollouts at `ultra` announce proactive multi-agent delegation and spawn sub-agents, rollouts at `max` are told not to. `max` is now "the highest allowed effort", not "the top of the enum"; a resolved `ultra` is never inherited (preflight pins the path's ceiling instead), never pinned, and a rollout at `ultra` or carrying any sub-agent call invalidates the verdict (CLAUDE.md, skill §2/§5/§6, both READMEs, `llms.txt`).
+- `docs/specs/codex-gpt-6-refresh.md`: the approved spec for this change.
+
+### Notes
+- The Codex plugin is unchanged: openai/codex-plugin-cc 1.0.6 is still the latest release (checked 2026-09-29), so every companion-level statement stands. On the Claude side the agents pin family aliases, which already resolve to Fable 5.1, Opus 5.5 and Sonnet 5.5 - no instruction change; only the worked example's sample provenance line is refreshed from a live probe.
 
 ## [0.4.0] - 2026-08-09
 
