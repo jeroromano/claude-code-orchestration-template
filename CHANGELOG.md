@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.5.0] - 2026-09-29
+
 ### Changed
 - Codex routing moves to the GPT-6 generation: GPT-6.1 Sol (`gpt-6.1-sol`) replaces GPT-5.6 Sol as the default model for reviews and spec-bound writing, at unchanged efforts (reviews at the per-path ceiling, writing at `medium`/`high`); GPT-6 Astra (`gpt-6-astra`), the costlier frontier tier, is reserved for the risk-path adversarial pass of Claude-authored diffs, degrading to GPT-6.1 Sol - disclosed in the report - when the account lacks it. Sol's "limited-access preview" caveat is replaced by its real gate: Codex CLI 0.159.0 or newer (older clients cannot see the model) plus account access (CLAUDE.md, skill §2/§5/§6, both READMEs, `llms.txt`, example workflow).
 - The model joins the fail-closed effort trio: preflight checks the resolved `model` - and `review_model`, which overrides it for the built-in reviewer - dispatch pins it per pass where the path allows (inline-task `--model`), and the rollout must show the ordered model or its declared degradation (skill §5/§6). The recommended TOML pins `review_model` alongside `model` (both READMEs).
@@ -108,7 +112,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.0
 [0.4.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.4.0
 [0.3.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.3.1
 [0.3.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.3.0
