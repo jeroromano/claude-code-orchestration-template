@@ -2,9 +2,9 @@
 
 This template ships no executable code - only Markdown instruction files. It has no runtime, no dependencies, and makes no network calls of its own, so its "attack surface" is what it instructs an AI agent to do. Two areas deserve care.
 
-## Data boundary (optional Codex integration)
+## Data boundary (optional Codex and Grok Build integrations)
 
-If you enable the optional [OpenAI Codex](https://github.com/openai/codex-plugin-cc) integration, every delegated task or review **ships the touched code to OpenAI's infrastructure**. Never delegate secrets, `.env*` files, credentials, customer data, or real-data fixtures. For confidential or client repositories, keep review local (the `diff-reviewer` agent) and make Codex opt-in per task. See the **Data boundary** section in `CLAUDE.md` and the **Security note** in `README.md`.
+If you enable the optional [OpenAI Codex](https://github.com/openai/codex-plugin-cc) integration, every delegated task or review **ships the touched code to OpenAI's infrastructure**; the optional [Grok Build](https://github.com/xai-org/grok-build-plugin-cc) fallback reviewer reads the repository at the reviewed commit, so **everything committed there can ship to xAI's** - the protocol dispatches it only when that whole tree may leave the machine. On native Windows its read-only sandbox is not enforced, so the protocol runs it there only with your OK for each run, and checks the tools it was offered and called. Never delegate secrets, `.env*` files, credentials, customer data, or real-data fixtures. For confidential or client repositories, keep review local (the `diff-reviewer` agent) and make Codex and Grok opt-in per task. See the **Data boundary** section in `CLAUDE.md` and the **Security note** in `README.md`.
 
 ## Spend safety
 
