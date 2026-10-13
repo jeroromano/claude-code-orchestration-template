@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.6.0] - 2026-10-13
+
 ### Added
 - Grok Build as an optional cross-family fallback reviewer: when the Codex route is unavailable (plugin absent, quota exhausted, model rejected, a review dispatch that fails or expires), the standard review of a Claude-authored diff goes to Grok Build before diff-reviewer, so the second pass stays cross-family. Grok is dispatched only when the whole committed tree may go to xAI (it reads the repository, not just the diff) and, on native Windows - where its read-only sandbox is not enforced (#24) - only with the human's OK per run. The orchestrator drives the plugin's internal bridge script from a disposable detached worktree (committed, tracked files only), pins effort `high` (the bridge's cap) unless the Grok config already sits at `xhigh`, never passes `--model`, and applies the 25-minute deadline with one extension. Tool control - tripwires that detect and stop, not a sandbox: right after the run starts, the tools Grok is offered are checked against a read-only allowlist measured on the probe (a shell, editing or sub-agent tool stops it), and afterwards every tool call must be flagged read-only; the session record must show the read-only profile and the ordered effort, the worktree's `git status` must be clean and the user's must match its pre-dispatch snapshot. Any miss sends the review to diff-reviewer; a call not flagged read-only or a mismatched `git status` is reported to the human first, as an incident. Grok never takes the risk-path adversarial pass, Codex-authored diffs or writing (skill §2 fallback rows, new §7, §5/§6 fallback references; CLAUDE.md review gate and Data boundary; both READMEs; `SECURITY.md`; `llms.txt`; example workflow). Upstream issues open on plugin 0.2.1 / CLI 1.0.52 are declared in the README with their stamps. Independently reviewed before release: GPT-6.1 Sol in two inline-task chunks (rollout-verified `xhigh`, read-only, zero tool calls) plus a diff-reviewer cross-chunk pass; the data-boundary scope, the per-run Windows consent and the tool control come from that review.
 - `docs/specs/grok-build-fallback-reviewer.md`: the approved spec, with the calibration probe that preceded it - Grok over the same `v0.4.0...v0.5.0` diff GPT-6.1 Sol had reviewed: 4 of Sol's 10 findings matched in full (+1 partial), two of three majors missed, no false positive, one valid finding Sol had missed.
@@ -132,7 +136,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.6.0
 [0.5.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.1
 [0.5.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.0
 [0.4.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.4.0
