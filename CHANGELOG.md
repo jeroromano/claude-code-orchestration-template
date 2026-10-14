@@ -4,7 +4,17 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- No review on a red tree: before any review is dispatched - Codex, Grok or diff-reviewer, first pass or fix round - the unit's VALIDATION commands must pass; a failure dispatches nothing and goes back to the diff's author, so review quota is never spent on what a local command reports (skill §3).
+- `docs/specs/gemini-4-argon-reviewer.md`: Gemini 4 Argon evaluated as a third external reviewer and deferred - verified facts (Gemini CLI does not serve it and no longer takes consumer logins, so a personal account reaches it only through Antigravity, whose consumer terms allow use of interactions for product improvement), why each part of the proposal was rejected, the conditions to revisit and the target role (the cross-chunk pass). Pointers in both READMEs and `llms.txt`.
+- Repositories that already keep an `AGENTS.md`: Claude Code skips it next to a `CLAUDE.md`, so the README now says to import it with `@AGENTS.md` (both READMEs).
+
+### Changed
+- A review pass whose only findings are nits counts as clean: left as they are, the loop closes; applied, they are a new delta with its narrow pass (skill §3).
+- A trivial mechanical edit may run fast-worker on `model: haiku` for that one invocation; a result rejected against its spec re-delegates on the pinned model (skill §2).
+
+### Fixed
+- diff-reviewer's frontmatter description still told the harness to pick it whenever Codex was unavailable, skipping the Grok Build step v0.6.0 added to the fallback order; it now names the full chain (`.claude/agents/diff-reviewer.md`).
 
 ## [0.6.0] - 2026-10-13
 

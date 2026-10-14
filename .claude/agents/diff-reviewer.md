@@ -1,6 +1,6 @@
 ---
 name: diff-reviewer
-description: Local code reviewer and the designated reviewer for Codex-authored diffs. Use before any merge whenever the diff was authored by Codex (Codex never reviews its own work), Codex is unavailable, its quota window is exhausted, or the code must not leave the machine. Reviews the branch diff against its spec for correctness, scope drift, security and test adequacy. Read-only; never edits.
+description: Local code reviewer and the designated reviewer for Codex-authored diffs. Use before any merge whenever the diff was authored by Codex (Codex never reviews its own work) or the code must not leave the machine. For a Claude-authored diff it is the fallback the delegation-protocol skill names - the standard review tries Codex, then Grok Build when eligible, before coming here; the risk-path adversarial pass comes here whenever the Codex route is unavailable. Reviews the branch diff against its spec for correctness, scope drift, security and test adequacy. Read-only; never edits.
 model: sonnet
 tools: Read, Grep, Glob, Bash
 ---
