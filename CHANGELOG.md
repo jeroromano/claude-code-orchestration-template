@@ -4,6 +4,10 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.7.0] - 2026-10-14
+
 ### Added
 - No review on a red tree: before any review is dispatched - Codex, Grok or diff-reviewer, first pass or fix round - the unit's VALIDATION commands must pass; a failure dispatches nothing and goes back to the diff's author, so review quota is never spent on what a local command reports (skill §3).
 - `docs/specs/gemini-4-argon-reviewer.md`: Gemini 4 Argon evaluated as a third external reviewer and deferred - verified facts (Gemini CLI does not serve it and no longer takes consumer logins, so a personal account reaches it only through Antigravity, whose consumer terms allow use of interactions for product improvement), why each part of the proposal was rejected, the conditions to revisit and the target role (the cross-chunk pass). Pointers in both READMEs and `llms.txt`.
@@ -146,7 +150,8 @@ Changes below address the findings of an independent GPT-5.6 Sol audit of v0.2.0
 - Review-mandatory threshold defined in the skill: an independent review is required only where a defect can act unmediated (runtime/behavioral surface); pure-doc changes may be self-merged.
 - `diff-reviewer` constrained to diagnosis, not solution authorship, to preserve an independent second pass.
 
-[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/jeroromano/claude-code-orchestration-template/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.7.0
 [0.6.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.6.0
 [0.5.1]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.1
 [0.5.0]: https://github.com/jeroromano/claude-code-orchestration-template/releases/tag/v0.5.0
