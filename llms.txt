@@ -21,6 +21,9 @@ This repository is a template, not a runtime library: its "code" is a set of Mar
 ## Skills
 
 - [.claude/skills/delegation-protocol/SKILL.md](.claude/skills/delegation-protocol/SKILL.md): the delegation mechanics - task-spec template, routing table, author-reviewer independence rules, and quota fallbacks. Loaded when delegating or reviewing.
+- [.claude/skills/delegation-protocol/codex-review-transport.md](.claude/skills/delegation-protocol/codex-review-transport.md): skill §6, read on demand - how a Codex review is shipped (direct or inline-task), its deadline, the rollout check of model, effort and read-only profile, and the validation of each finding.
+- [.claude/skills/delegation-protocol/grok-fallback-review.md](.claude/skills/delegation-protocol/grok-fallback-review.md): skill §7, read on demand - the optional Grok Build fallback review: readiness and consent, the disposable worktree, tool control, verification.
+- [.claude/skills/x-search/SKILL.md](.claude/skills/x-search/SKILL.md): X (Twitter) search through the Grok Build CLI, because Claude's web tools cannot reach x.com - an empty working directory, web search and page fetch only, the user's request as consent, checks of every call and every quote against Grok's session record.
 
 ## Concepts
 

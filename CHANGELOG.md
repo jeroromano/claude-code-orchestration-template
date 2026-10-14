@@ -4,7 +4,12 @@ Notable changes to this template. The format follows [Keep a Changelog](https://
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- X search through Grok Build (`.claude/skills/x-search/`): Claude's web tools cannot read X (an x.com page returns HTTP 402; web search returns no x.com posts), so a request for X content goes to the Grok Build CLI in headless mode - an empty temp directory, web search and page fetch as the only tools, MCP meta-tools denied, the default model at effort `low`, a 300-second wall clock. Before the run it checks that no Grok config file or environment variable has enabled `allow_local` (which lets `web_fetch` reach loopback hosts), and does not run if one has. Afterwards the orchestrator checks the offered tools, that every local call was read-only (backend searches run on xAI's side), the sandbox profile and effort, that the directory is still empty, and that each quoted post was opened at its X post link, with the quote matching that post's own text (the fetched page's title line names it; other posts in the thread do not count) and a link to that post under the quoted handle in the fetch result; the report carries verified provenance and tokens, never money. The user's request is the consent for its query, and Claude never starts an X search on its own initiative; only the query and public pages reach xAI. Needs the CLI, not the plugin (both READMEs, `AGENTS.md`, `llms.txt`, `SECURITY.md`).
+- `docs/specs/skill-split-and-x-search.md`: the approved spec, with the probe measurements - three search runs and a check that Grok's `web_fetch` refuses `file://` URLs.
+
+### Changed
+- The delegation skill's §6 (review transport) and §7 (Grok fallback review) moved verbatim into `codex-review-transport.md` and `grok-fallback-review.md`, read on demand; `SKILL.md` keeps both headings with a mandatory-read stub, so every "§6 step N" and "§7 step N" reference still holds; the §6 stub also names validating any review or audit finding, whatever its source (§6 step 6). `SKILL.md` drops from 39 KB to 20 KB - about half the tokens whenever the skill loads for work without a review.
 
 ## [0.7.0] - 2026-10-14
 

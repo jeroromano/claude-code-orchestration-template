@@ -14,6 +14,9 @@ A **documentation template** for orchestrating [Claude Code](https://code.claude
 | `CLAUDE.md` | The orchestration policy - behavioral source of truth. |
 | `.claude/agents/*.md` | The four subagents: `fast-worker`, `deep-reasoner`, `premium-reasoner`, `diff-reviewer`. |
 | `.claude/skills/delegation-protocol/SKILL.md` | Delegation mechanics: task-spec template, routing table, review rules. |
+| `.claude/skills/delegation-protocol/codex-review-transport.md` | Skill §6, read on demand: Codex review transport, rollout verification, finding validation. |
+| `.claude/skills/delegation-protocol/grok-fallback-review.md` | Skill §7, read on demand: the optional Grok Build fallback review. |
+| `.claude/skills/x-search/SKILL.md` | X (Twitter) search through the Grok Build CLI - Claude's web tools cannot reach x.com. |
 | `docs/example-workflow.md` | Worked end-to-end example of the delegation protocol. Documentation only - not part of the install payload. |
 | `llms.txt` | Compact machine-readable map of the project. |
 

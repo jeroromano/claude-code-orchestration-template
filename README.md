@@ -34,6 +34,9 @@ Each rule lives in the primitive whose loading semantics it matches - that place
 | `.claude/agents/premium-reasoner.md` (top tier) | on invocation | the escalation rung; spend-gated, see below |
 | `.claude/agents/diff-reviewer.md` (Sonnet) | on invocation | adversarial branch review before merge; read-only; local fallback |
 | `.claude/skills/delegation-protocol/SKILL.md` | when delegating | task-spec template, routing table, quota fallbacks |
+| `.claude/skills/delegation-protocol/codex-review-transport.md` | read on demand, for any Codex review | review transport, rollout verification, finding validation (skill §6) |
+| `.claude/skills/delegation-protocol/grok-fallback-review.md` | read on demand, for a Grok fallback review | the optional Grok Build fallback review (skill §7) |
+| `.claude/skills/x-search/SKILL.md` | when you ask for content from X | X (Twitter) search through the Grok Build CLI |
 
 The agents are project-agnostic on purpose: everything project-specific (risk paths, validation commands, data boundaries) lives only in `CLAUDE.md` - one source of truth.
 
@@ -165,13 +168,24 @@ Requirements: the Grok Build CLI on your PATH (its installer puts it in `~/.grok
 
 **Interface coupling and known issues, declared** (verified October 2026 against plugin 0.2.1 and Grok Build CLI 1.0.52): `/grok-build:review` is not model-invocable, so the protocol drives the plugin's *internal* bridge script - re-verify its flags, job payload and session-record fields on every plugin or CLI update. Upstream issues open at that date: on native Windows the read-only sandbox is not enforced (#24) - Grok's docs say its review agent can run shell commands, although the run measured here was offered no shell or editing tool - and a worktree separates checkouts but confines nothing, hence the per-run OK and the tool allowlist above; `--model` hangs headless (#31); `import` fails (#21) and `critique` likely does (#35); the plugin's session hook grows Claude's env file on every start until Bash commands break (#18, fix proposed in PR #19); and it exports its data directory under the generic `CLAUDE_PLUGIN_DATA`, which other plugins' scripts - the Codex companion included - then inherit (#49). A plugin update overwrites any local fix you apply for the last two.
 
+## Optional: X search through Grok Build
+
+Claude's web tools cannot read X (formerly Twitter): an x.com page returns HTTP 402 and web search returns no x.com posts (measured October 2026). With the Grok Build CLI installed and signed in - the plugin above is not needed - the `x-search` skill sends that kind of request to Grok, whose web search indexes x.com posts and whose `web_fetch` opens public profile and post pages.
+
+- **What leaves the machine:** the query, plus the text of the public pages Grok fetches - no repository content. Grok runs in an empty temp directory and is offered only web search and page fetch: no file, shell, editing or sub-agent tool. Its `web_fetch` refuses `file://` URLs and, by default, local addresses: before each run Claude checks that no Grok config file or environment variable has turned that default off (`allow_local`), and does not run if one has.
+- **Consent:** your request for X content is the OK for that query; Claude never starts an X search on its own initiative. Unlike the Grok review above, there is no per-run OK on native Windows: that OK covers a run that reads your repository under an unenforced sandbox, and this one is offered no tool that can reach your files. Keep code, secrets and private names out of the query.
+- **Checks:** afterwards Claude reads Grok's session record to verify the offered tools, that every local call was read-only, and that each quoted post was opened at its X link, with the quote matching that post's own text - not another post in its thread - and its author on the page - a quote that fails is dropped or labeled. On native Windows Grok's sandbox is not enforced (#24), so these checks, not the sandbox, are the protection.
+- **Limits:** search index plus public pages, not a logged-in X search - X's own search page shows Grok a login wall - and recency depends on the index. Claude cannot open x.com to confirm the quotes independently, and says so. Spend draws on your Grok account; reports show tokens, never money.
+
+Measured October 2026 on Grok Build CLI 1.0.52; probe numbers and the full design in [docs/specs/skill-split-and-x-search.md](docs/specs/skill-split-and-x-search.md).
+
 ## Evaluated, not adopted: Gemini 4 Argon
 
 Gemini 4 Argon was weighed as a third external reviewer in October 2026 and kept out for now. A consumer Google account reaches it only through Google Antigravity, whose terms let Google use your interactions to improve its products - with human access, no stated retention limit and no defined training opt-out - and Gemini CLI neither accepts consumer logins any more nor serves the model. The evaluation, the verified facts and the conditions to revisit (a no-training route, a scriptable CLI, enforced read-only, a calibration probe) live in [docs/specs/gemini-4-argon-reviewer.md](docs/specs/gemini-4-argon-reviewer.md).
 
 ## Security note
 
-Codex runs on OpenAI infrastructure, and Grok Build - if you install that fallback - on xAI's: every delegated task or review ships the touched code there. Grok goes further: it reads the repository at the reviewed commit, so everything committed there can reach xAI - which is why the protocol dispatches it only when that whole tree may leave the machine. Never delegate secrets, `.env*`, credentials, customer data or real-data fixtures. For confidential or client repos, adapt the **Data boundary** section in `CLAUDE.md`: local `diff-reviewer` by default, Codex and Grok opt-in per task.
+Codex runs on OpenAI infrastructure, and Grok Build - if you install that fallback - on xAI's: every delegated task or review ships the touched code there. Grok goes further: it reads the repository at the reviewed commit, so everything committed there can reach xAI - which is why the protocol dispatches it only when that whole tree may leave the machine. The optional X search sends xAI only the query and the public pages Grok fetches, never repository content. Never delegate secrets, `.env*`, credentials, customer data or real-data fixtures. For confidential or client repos, adapt the **Data boundary** section in `CLAUDE.md`: local `diff-reviewer` by default, Codex and Grok opt-in per task.
 
 ## Uninstall
 
@@ -183,14 +197,14 @@ Everything here is declarative files inside your repo - no hooks, no daemons, no
 # bash / zsh / Git Bash
 rm -f CLAUDE.md
 rm -f .claude/agents/{fast-worker,deep-reasoner,premium-reasoner,diff-reviewer}.md
-rm -rf .claude/skills/delegation-protocol
+rm -rf .claude/skills/delegation-protocol .claude/skills/x-search
 ```
 
 ```powershell
 # PowerShell (Windows) - brace expansion does not exist here, hence the explicit list
 Remove-Item CLAUDE.md -Force
 Remove-Item .claude\agents\fast-worker.md, .claude\agents\deep-reasoner.md, .claude\agents\premium-reasoner.md, .claude\agents\diff-reviewer.md -Force
-Remove-Item .claude\skills\delegation-protocol -Recurse -Force
+Remove-Item .claude\skills\delegation-protocol, .claude\skills\x-search -Recurse -Force
 ```
 
 Restart the session; `/agents` should list none of them.

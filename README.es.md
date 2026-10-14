@@ -39,6 +39,9 @@ Cada regla vive en la primitiva cuya semántica de carga le corresponde — esa 
 | `.claude/agents/premium-reasoner.md` (tier máximo) | al invocarse | el escalón de escalación; con compuerta de gasto, ver abajo |
 | `.claude/agents/diff-reviewer.md` (Sonnet) | al invocarse | revisión adversarial de la branch antes del merge; solo lectura; fallback local |
 | `.claude/skills/delegation-protocol/SKILL.md` | al delegar | template de spec de tareas, tabla de ruteo, fallbacks de cuota |
+| `.claude/skills/delegation-protocol/codex-review-transport.md` | se lee cuando hace falta, en toda revisión de Codex | transporte de la revisión, verificación del rollout, validación de hallazgos (skill §6) |
+| `.claude/skills/delegation-protocol/grok-fallback-review.md` | se lee cuando hace falta, en una revisión de respaldo con Grok | la revisión de respaldo opcional con Grok Build (skill §7) |
+| `.claude/skills/x-search/SKILL.md` | cuando pedís contenido de X | búsqueda en X (Twitter) a través del CLI de Grok Build |
 
 Los agentes son agnósticos del proyecto a propósito: todo lo específico (risk paths, comandos de validación, fronteras de datos) vive únicamente en `CLAUDE.md` — una sola fuente de verdad.
 
@@ -167,13 +170,24 @@ Requisitos: el CLI de Grok Build en tu PATH (su instalador lo deja en `~/.grok/b
 
 **Acoplamiento de interfaz y problemas conocidos, declarados** (verificado en octubre de 2026 contra el plugin 0.2.1 y Grok Build CLI 1.0.52): `/grok-build:review` no es invocable por el modelo, así que el protocolo maneja el script bridge *interno* del plugin — re-verificá sus flags, el payload del job y los campos del registro de sesión en cada actualización del plugin o del CLI. Issues upstream abiertos a esa fecha: en Windows nativo el sandbox de solo lectura no se aplica (#24) — la documentación de Grok dice que su agente de revisión puede ejecutar comandos de shell, aunque a la corrida medida acá no se le ofreció ninguna herramienta de shell ni de edición — y un worktree separa checkouts pero no confina nada, de ahí el OK por corrida y la allowlist de herramientas de arriba; `--model` se cuelga en headless (#31); `import` falla (#21) y `critique` probablemente también (#35); el hook de sesión del plugin agranda el archivo de entorno de Claude en cada inicio hasta que los comandos de Bash se rompen (#18, fix propuesto en el PR #19); y exporta su directorio de datos bajo el genérico `CLAUDE_PLUGIN_DATA`, que después heredan los scripts de otros plugins — el companion de Codex incluido (#49). Una actualización del plugin pisa cualquier fix local que apliques para estos dos últimos.
 
+## Opcional: búsqueda en X a través de Grok Build
+
+Las herramientas web de Claude no pueden leer X (antes Twitter): una página de x.com devuelve HTTP 402 y la búsqueda web no trae posts de x.com (medido en octubre de 2026). Con el CLI de Grok Build instalado y con sesión iniciada — el plugin de arriba no hace falta —, la skill `x-search` le pasa ese tipo de pedido a Grok, cuya búsqueda web indexa posts de x.com y cuyo `web_fetch` abre páginas públicas de perfiles y de posts.
+
+- **Qué sale de la máquina:** la consulta, más el texto de las páginas públicas que Grok abre — nada del repositorio. Grok corre en una carpeta temporal vacía y solo se le ofrecen búsqueda web y apertura de páginas: ninguna herramienta de archivos, de shell, de edición ni de sub-agentes. Su `web_fetch` rechaza URLs `file://` y, por defecto, direcciones locales: antes de cada corrida Claude chequea que ningún archivo de config ni variable de entorno de Grok haya desactivado ese comportamiento (`allow_local`), y si alguno lo hizo, no corre.
+- **Consentimiento:** tu pedido de contenido de X es el OK para esa consulta; Claude nunca arranca una búsqueda en X por iniciativa propia. A diferencia de la revisión con Grok de arriba, no hay OK por corrida en Windows nativo: ese OK cubre una corrida que lee tu repositorio bajo un sandbox que no se aplica, y a esta no se le ofrece ninguna herramienta que llegue a tus archivos. Dejá afuera de la consulta código, secretos y nombres privados.
+- **Chequeos:** después, Claude lee el registro de sesión de Grok para verificar las herramientas ofrecidas, que cada llamada local haya sido de solo lectura y que cada post citado se haya abierto en su enlace de X, con la cita coincidiendo con el texto de ese post — no con otro post de su hilo — y su autor en la página — una cita que no pasa se descarta o se marca. En Windows nativo el sandbox de Grok no se aplica (#24), así que la protección son estos chequeos, no el sandbox.
+- **Límites:** índice de búsqueda más páginas públicas, no una búsqueda en X con sesión iniciada — la página de búsqueda propia de X le muestra a Grok una pantalla de login —, y lo reciente depende del índice. Claude no puede abrir x.com para confirmar las citas por su cuenta, y lo dice. El gasto sale de tu cuenta de Grok; los reportes muestran tokens, nunca dinero.
+
+Medido en octubre de 2026 con Grok Build CLI 1.0.52; los números de las pruebas y el diseño completo están en [docs/specs/skill-split-and-x-search.md](docs/specs/skill-split-and-x-search.md) (en inglés).
+
 ## Evaluado, no adoptado: Gemini 4 Argon
 
 Gemini 4 Argon se evaluó como tercer revisor externo en octubre de 2026 y por ahora quedó afuera. Con una cuenta de consumidor de Google solo se llega a él por Google Antigravity, cuyos términos dejan que Google use tus interacciones para mejorar sus productos — con acceso humano, sin plazo de retención declarado y sin un opt-out de entrenamiento definido —, y Gemini CLI ya no acepta logins de consumidor ni sirve el modelo. La evaluación, los datos verificados y las condiciones para reconsiderarlo (una vía sin entrenamiento, una CLI scriptable, solo lectura aplicada, una prueba de calibración) están en [docs/specs/gemini-4-argon-reviewer.md](docs/specs/gemini-4-argon-reviewer.md) (en inglés).
 
 ## Nota de seguridad
 
-Codex corre en infraestructura de OpenAI, y Grok Build — si instalás ese respaldo — en la de xAI: cada tarea o revisión delegada embarca allí el código tocado. Grok va más lejos: lee el repositorio en el commit revisado, así que todo lo commiteado ahí puede llegar a xAI — por eso el protocolo lo despacha solo cuando ese árbol entero puede salir de la máquina. Nunca delegues secretos, `.env*`, credenciales, datos de clientes ni fixtures con datos reales. Para repos confidenciales o de clientes, adaptá la sección **Data boundary** de `CLAUDE.md`: `diff-reviewer` local por defecto, Codex y Grok opt-in por tarea.
+Codex corre en infraestructura de OpenAI, y Grok Build — si instalás ese respaldo — en la de xAI: cada tarea o revisión delegada embarca allí el código tocado. Grok va más lejos: lee el repositorio en el commit revisado, así que todo lo commiteado ahí puede llegar a xAI — por eso el protocolo lo despacha solo cuando ese árbol entero puede salir de la máquina. La búsqueda opcional en X le manda a xAI solo la consulta y las páginas públicas que abre Grok, nunca contenido del repositorio. Nunca delegues secretos, `.env*`, credenciales, datos de clientes ni fixtures con datos reales. Para repos confidenciales o de clientes, adaptá la sección **Data boundary** de `CLAUDE.md`: `diff-reviewer` local por defecto, Codex y Grok opt-in por tarea.
 
 ## Desinstalación
 
@@ -185,14 +199,14 @@ Todo esto son archivos declarativos dentro de tu repo — sin hooks, sin demonio
 # bash / zsh / Git Bash
 rm -f CLAUDE.md
 rm -f .claude/agents/{fast-worker,deep-reasoner,premium-reasoner,diff-reviewer}.md
-rm -rf .claude/skills/delegation-protocol
+rm -rf .claude/skills/delegation-protocol .claude/skills/x-search
 ```
 
 ```powershell
 # PowerShell (Windows) - acá no existe la brace expansion, por eso la lista explícita
 Remove-Item CLAUDE.md -Force
 Remove-Item .claude\agents\fast-worker.md, .claude\agents\deep-reasoner.md, .claude\agents\premium-reasoner.md, .claude\agents\diff-reviewer.md -Force
-Remove-Item .claude\skills\delegation-protocol -Recurse -Force
+Remove-Item .claude\skills\delegation-protocol, .claude\skills\x-search -Recurse -Force
 ```
 
 Reiniciá la sesión; `/agents` no debería listar ninguno.
